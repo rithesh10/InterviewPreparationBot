@@ -98,16 +98,16 @@ const LoginPage = () => {
   
 
   return (
-    <div className="flex w-screen min-h-screen items-center justify-center bg-gray-900 px-4 py-12 sm:px-6 lg:px-8 bg-[url('/img/castle-bg.jpg')] bg-cover bg-center">
-      <div className="w-full max-w-md space-y-8 bg-gray-800 p-8 shadow-md rounded-lg border border-gray-700">
+    <div className="flex w-screen   min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 bg-white p-8 shadow-md rounded-lg">
         <div>
-          <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-200">
-            Pledge Your Allegiance
+          <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-900">
+            Sign in to your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-400">
+          <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
-            <a href="/register" className="font-medium text-red-600 hover:text-red-500">
-              begin your allegianece by combat
+            <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
+              start your 14-day free trial
             </a>
           </p>
         </div>
@@ -115,8 +115,8 @@ const LoginPage = () => {
         <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                Raven Address
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
               </label>
               <input
                 id="email"
@@ -125,9 +125,9 @@ const LoginPage = () => {
                 autoComplete="email"
                 required
                 className={`mt-1 block w-full px-4 py-2 border ${
-                  errors.email ? 'border-red-700' : 'border-gray-600'
-                } rounded-lg focus:outline-none text-gray-200 bg-gray-700 focus:ring-red-500 focus:border-red-500`}
-                placeholder="Enter your raven address"
+                  errors.email ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:outline-none text-black focus:ring-indigo-500 focus:border-indigo-500`}
+                placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
               />
@@ -135,8 +135,8 @@ const LoginPage = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                House Words
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
               </label>
               <input
                 id="password"
@@ -145,9 +145,9 @@ const LoginPage = () => {
                 autoComplete="current-password"
                 required
                 className={`mt-1 block w-full px-4 py-2 border ${
-                  errors.password ? 'border-red-700' : 'border-gray-600'
-                } rounded-lg focus:outline-none text-gray-200 bg-gray-700 focus:ring-red-500 focus:border-red-500`}
-                placeholder="Enter your house words"
+                  errors.password ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:outline-none text-black focus:ring-indigo-500 focus:border-indigo-500`}
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
               />
@@ -161,16 +161,16 @@ const LoginPage = () => {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-red-600 border-gray-600 rounded focus:ring-red-500 bg-gray-700"
+                className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
               />
-              <label htmlFor="remember-me" className="ml-2 text-sm text-gray-300">
-                Remember my oath
+              <label htmlFor="remember-me" className="ml-2 text-sm text-gray-900">
+                Remember me
               </label>
             </div>
 
             <div className="text-sm">
-              <a href="#" className="text-yellow-500 hover:text-yellow-400">
-                Forgot your house words?
+              <a href="#" className="text-indigo-600 hover:text-indigo-500">
+                Forgot your password?
               </a>
             </div>
           </div>
@@ -179,7 +179,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-2 px-4 border border-red-800 rounded-lg text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700 disabled:bg-red-900"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
             >
               {isLoading ? (
                 <svg
@@ -196,12 +196,12 @@ const LoginPage = () => {
                   ></path>
                 </svg>
               ) : (
-                'Swear Fealty'
+                'Sign in'
               )}
             </button>
           </div>
         </form>
-        <div className="text-center text-red-500">{message}</div>
+        {message}
       </div>
     </div>
   );

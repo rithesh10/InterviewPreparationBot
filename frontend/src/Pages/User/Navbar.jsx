@@ -7,7 +7,6 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // console.log(user)
 
   const handleLogout = () => {
     logout();
@@ -19,19 +18,16 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-gray-900 border-b border-yellow-800 shadow-md w-screen relative">
-      {/* Gold accent line */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-900 via-yellow-600 to-yellow-900"></div>
-      
+    <nav className="bg-blue-600 shadow-md w-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link
               to="/user"
-              className="text-2xl font-bold text-yellow-600 hover:text-yellow-500 font-serif tracking-wider"
+              className="text-2xl font-bold text-white hover:text-gray-200"
             >
-              REALM PORTAL
+              JobPortal
             </Link>
           </div>
 
@@ -39,7 +35,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={toggleMenu}
-              className="text-gray-300 hover:text-yellow-600 focus:outline-none focus:text-yellow-600"
+              className="text-white hover:text-gray-300 focus:outline-none focus:text-gray-300"
             >
               <svg
                 className="h-6 w-6"
@@ -71,77 +67,77 @@ const Navbar = () => {
           <div className="hidden md:flex md:items-center md:space-x-6">
             <Link
               to="/user"
-              className="text-gray-300 hover:bg-gray-800 hover:text-yellow-500 px-3 py-2 rounded-md text-sm font-medium border-b border-transparent hover:border-yellow-700"
+              className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium"
             >
-            Home
+              Dashboard
             </Link>
             <Link
               to="/user/upload-resume"
-              className="text-gray-300 hover:bg-gray-800 hover:text-yellow-500 px-3 py-2 rounded-md text-sm font-medium border-b border-transparent hover:border-yellow-700"
+              className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium"
             >
-              Upload resume
+              Upload Resume
             </Link>
             <Link
               to="/user/jobs"
-              className="text-gray-300 hover:bg-gray-800 hover:text-yellow-500 px-3 py-2 rounded-md text-sm font-medium border-b border-transparent hover:border-yellow-700"
+              className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium"
             >
-              Job listings
+              Job Listings
             </Link>
           </div>
 
           {/* User Info and Logout */}
           <div className="hidden md:flex md:items-center md:space-x-4">
             {user && (
-              <span className="text-gray-300 text-sm font-serif italic">
-                Hail, {user.full_name} of House Stark
+              <span className="text-white text-sm">
+                Welcome, {user.name}!
               </span>
             )}
             <button
               onClick={handleLogout}
-              className="bg-red-900 text-gray-200 px-3 py-2 rounded-md text-sm font-medium hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-700 border border-red-700"
+              className="bg-red-500 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
             >
-              Abandon Realm
+              Logout
             </button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-gray-800 border-t border-yellow-900">
+          <div className="md:hidden bg-blue-500">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <Link
                 to="/user"
-                className="text-gray-300 hover:bg-gray-700 hover:text-yellow-500 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium"
               >
-                War Council
+                Dashboard
               </Link>
               <Link
                 to="/user/upload-resume"
-                className="text-gray-300 hover:bg-gray-700 hover:text-yellow-500 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium"
               >
-                Send Ravens
+                Upload Resume
               </Link>
               <Link
                 to="/user/jobs"
-                className="text-gray-300 hover:bg-gray-700 hover:text-yellow-500 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium"
               >
-                Royal Decrees
+                Job Listings
               </Link>
               {user && (
-                <div className="pt-4 pb-3 border-t border-gray-600">
+                <div className="pt-4 pb-3 border-t border-gray-400">
                   <div className="flex items-center px-5">
                     <div className="ml-3">
-                      <div className="text-base font-medium text-yellow-600 font-serif">
-                        {user.name} of House Stark
+                      <div className="text-base font-medium text-white">
+                        {user.name}
                       </div>
                     </div>
                   </div>
                   <div className="mt-3 space-y-1">
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-3 py-2 text-base font-medium text-gray-300 hover:bg-red-900 hover:text-gray-100 rounded-md"
+                      className="block w-full text-left px-3 py-2 text-base font-medium text-white hover:bg-red-500 hover:text-gray-100"
                     >
-                      Abandon Realm
+                      Logout
                     </button>
                   </div>
                 </div>
@@ -150,9 +146,6 @@ const Navbar = () => {
           </div>
         )}
       </div>
-      
-      {/* Gold accent line at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-900 via-yellow-600 to-yellow-900"></div>
     </nav>
   );
 };

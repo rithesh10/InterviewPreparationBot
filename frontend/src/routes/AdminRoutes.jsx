@@ -7,7 +7,6 @@ import AdminNavbar from '../Pages/Admin/AdminNavbar'
 import ResumeList from '../Pages/Admin/ResumeList'
 import ResumeRankings from '../Pages/Admin/ResumeRankings'
 import JobDescription from '../Pages/Admin/JobDescription'
-import Hello from '../Pages/Admin/Hello'
 const AdminRoutes = () => {
   return (
     <div>
@@ -19,7 +18,7 @@ const AdminRoutes = () => {
                 <Route path='resumes/resume/:id' element={<Resumes/>}/>
                 <Route path='resume-rankings/:job_id' element={<ResumeRankings/>}/>
                 {/* <Route path="jobs" element={}/> */}
-               <Route path='job/:id' element={<JobDescription/>}/>
+                <Route path='job/:id' element={<JobDescription/>}/>
               </Route>
 
             </Routes>

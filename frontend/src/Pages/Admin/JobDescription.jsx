@@ -6,198 +6,156 @@ import {
   Calendar,
   DollarSign,
   CheckCircle2,
-  BookmarkIcon,
-  Shield,
-  Scroll,
-  Crown,
-  Flag,
-  X
+  BookmarkIcon
 } from "lucide-react";
 import axios from "axios";
 import config from "../../config/config";
 import { useParams } from "react-router-dom";
-
 const JobDescription = () => {
-  const [job, setJob] = useState(null);
-  const [message, setMessage] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { id } = useParams();
-  
-  useEffect(() => {
-    if (id) {
-      fetchJob();
-    }
-  }, [id]);
-  
-  const fetchJob = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`${config.backendUrl}/jobs/job/${id}`, {
-        withCredentials: true
-      });
-      
-      if (response.status === 404) {
-        throw new Error('Job not found');
-      }
-      
-      setJob(response.data.job);
-    } catch (error) {
-      console.error('Error fetching job:', error);
-      setMessage('Failed to fetch job details.');
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    const [job, setJob] = useState(null);
+    const [message, setMessage] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const {id} =useParams()
+    // Simulated job ID - replace with actual retrieval method
+    // const id = "job_123"; 
 
-  if (isLoading) {
-    return (
-      <div className="max-w-6xl mx-auto my-8 flex justify-center items-center h-96 bg-gray-900 rounded-lg">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-amber-600 border-gray-700"></div>
-          <p className="mt-4 text-amber-500 font-serif">The ravens are gathering information...</p>
+    useEffect(() => {
+        fetchJob();
+    }, [id]);
+
+    const fetchJob = async () => {
+        setIsLoading(true);
+        try {
+            const response = await axios.get(`${config.backendUrl}/jobs/job/${id}`, {
+               withCredentials:true
+            });
+            
+            if (response.status===404) {
+                throw new Error('Failed to fetch job details');
+            }
+
+            const data = await response.data.job;
+            setJob(data);
+        } catch (error) {
+            console.error("Error fetching job:", error);
+            setMessage("Failed to fetch job details.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const renderJobHeader = () => (
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-xl">
+            <div className="flex justify-between items-start">
+                <div>
+                    <h2 className="text-3xl font-bold mb-3">{job.title}</h2>
+                    <div className="flex items-center space-x-4">
+                        <div className="flex items-center">
+                            <Briefcase className="mr-2 text-indigo-200" />
+                            <span className="font-medium">{job.company}</span>
+                        </div>
+                        <div className="flex items-center">
+                            <MapPin className="mr-2 text-indigo-200" />
+                            <span>{job.location}</span>
+                        </div>
+                    </div>
+                </div>
+                <button className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors">
+                    <BookmarkIcon className="text-white" />
+                </button>
+            </div>
         </div>
-      </div>
     );
-  }
 
-  if (message) {
-    return (
-      <div className="max-w-6xl mx-auto my-8 p-8 bg-gray-900 text-red-500 flex justify-center items-center h-64 rounded-lg">
-        <div className="text-center">
-          <X size={48} className="mx-auto mb-4" />
-          <p className="text-xl">{message}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!job) return null;
-
-  return (
-    <div className=" mx-auto bg-black-1000">
-      {/* Banner with House sigil-like design */}
-      <div className="relative h-48 bg-gray-900 rounded-t-lg overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900"></div>
-        <div className="absolute inset-0 bg-[url('https://via.placeholder.com/1600x400')] opacity-20 bg-center bg-cover"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Flag className="text-amber-600 w-16 h-16" />
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-gray-900 to-transparent"></div>
-      </div>
-
-      <div className="bg-gray-900 border-t-4 border-amber-600 shadow-xl">
-        {/* Main content area with two-column layout for desktop */}
-        <div className="md:flex">
-          {/* Left sidebar - Company information */}
-          <div className="md:w-1/3 p-6 border-r border-gray-800">
-            <div className="sticky top-6">
-              <div className="mb-6 pb-6 border-b border-gray-800">
-                <h2 className="text-3xl font-serif text-amber-500 mb-2">{job.title}</h2>
-                <div className="flex items-center mb-3">
-                  <Shield className="mr-2 text-amber-400" size={16} />
-                  <span className="text-gray-300 font-medium">{job.company}</span>
+    const renderJobDetails = () => (
+        <div className="p-6 space-y-6">
+            <div className="grid md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center">
+                    <Calendar className="mr-2 text-indigo-600" />
+                    <div>
+                        <span className="text-xs text-gray-500">Posted On</span>
+                        <p className="font-medium">{new Date(job.posted_date).toLocaleDateString()}</p>
+                    </div>
                 </div>
                 <div className="flex items-center">
-                  <MapPin className="mr-2 text-amber-400" size={16} />
-                  <span className="text-gray-300">{job.location}</span>
-                </div>
-              </div>
-
-              <div className="mb-6 pb-6 border-b border-gray-800">
-                <h3 className="text-lg font-serif text-amber-500 mb-4">The Offering</h3>
-                <div className="flex items-center mb-4">
-                  <Crown className="mr-3 text-amber-400" size={16} />
-                  <div>
-                    <span className="text-xs text-gray-400">Reward</span>
-                    <p className="text-gray-300">{job.salary_range}</p>
-                  </div>
+                    <Calendar className="mr-2 text-indigo-600" />
+                    <div>
+                        <span className="text-xs text-gray-500">Application Deadline</span>
+                        <p className="font-medium">{new Date(job.application_deadline).toLocaleDateString()}</p>
+                    </div>
                 </div>
                 <div className="flex items-center">
-                  <Calendar className="mr-3 text-amber-400" size={16} />
-                  <div>
-                    <span className="text-xs text-gray-400">Posted</span>
-                    <p className="text-gray-300">{new Date(job.posted_date).toLocaleDateString()}</p>
-                  </div>
+                    <DollarSign className="mr-2 text-green-600" />
+                    <div>
+                        <span className="text-xs text-gray-500">Salary Range</span>
+                        <p className="font-medium">{job.salary_range}</p>
+                    </div>
                 </div>
-              </div>
-
-              <div className="mb-6">
-                <button className="w-full bg-amber-700 hover:bg-amber-600 text-gray-100 py-3 px-4 rounded font-medium flex items-center justify-center">
-                  <Scroll className="mr-2" size={18} />
-                  <span>Pledge Your Service</span>
-                </button>
-                <button className="w-full mt-3 bg-transparent hover:bg-gray-800 text-amber-500 border border-amber-700 py-3 px-4 rounded font-medium flex items-center justify-center">
-                  <BookmarkIcon className="mr-2" size={18} />
-                  <span>Save to Scroll</span>
-                </button>
-              </div>
-
-              <div className="text-xs text-gray-500 text-center">
-                Apply before {new Date(job.application_deadline).toLocaleDateString()}
-              </div>
-            </div>
-          </div>
-
-          {/* Right side - Main content */}
-          <div className="md:w-2/3 p-6">
-            {/* Description section */}
-            <div className="mb-8">
-              <div className="flex items-center mb-4">
-                <Scroll className="mr-2 text-amber-500" />
-                <h3 className="text-xl font-serif text-amber-500">The Decree</h3>
-              </div>
-              <div className="text-gray-300 leading-relaxed space-y-4">
-                <p>{job.description}</p>
-              </div>
             </div>
 
-            {/* Skills section */}
-            <div className="mb-8">
-              <div className="flex items-center mb-4">
-                <Shield className="mr-2 text-amber-500" />
-                <h3 className="text-xl font-serif text-amber-500">Required Talents</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {job.skills_required.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-800 text-amber-400 px-3 py-1 rounded text-sm border border-gray-700"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
+            <div>
+                <h3 className="text-xl font-semibold mb-3 flex items-center">
+                    <CheckCircle2 className="mr-2 text-indigo-600" />
+                    Job Description
+                </h3>
+                <p className="text-gray-700 leading-relaxed">{job.description}</p>
             </div>
 
-            {/* Requirements section */}
-            <div className="mb-8">
-              <div className="flex items-center mb-4">
-                <Crown className="mr-2 text-amber-500" />
-                <h3 className="text-xl font-serif text-amber-500">Oath of Service</h3>
-              </div>
-              <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-                <ul className="space-y-4 text-gray-300">
-                  {job.requirements.map((req, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle2 className="mr-3 mt-1 text-amber-500 flex-shrink-0" size={18} />
-                      <span>{req}</span>
-                    </li>
-                  ))}
+            <div className="space-y-3">
+                <h3 className="text-xl font-semibold flex items-center">
+                    <CheckCircle2 className="mr-2 text-indigo-600" />
+                    Skills Required
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                    {job.skills_required.map((skill, index) => (
+                        <span 
+                            key={index} 
+                            className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium"
+                        >
+                            {skill}
+                        </span>
+                    ))}
+                </div>
+            </div>
+
+            <div className="space-y-3">
+                <h3 className="text-xl font-semibold flex items-center">
+                    <CheckCircle2 className="mr-2 text-indigo-600" />
+                    Requirements
+                </h3>
+                <ul className="space-y-2 text-gray-700">
+                    {job.requirements.map((req, index) => (
+                        <li 
+                            key={index} 
+                            className="flex items-start"
+                        >
+                            <CheckCircle2 className="mr-2 mt-1 text-green-500 flex-shrink-0" />
+                            {req}
+                        </li>
+                    ))}
                 </ul>
-              </div>
             </div>
 
-            {/* House words - Footer */}
-            <div className="border-t border-gray-800 pt-6 mt-8">
-              <blockquote className="italic text-gray-400 text-center font-serif">
-                "A Lannister always pays his debts"
-              </blockquote>
-            </div>
-          </div>
+           
         </div>
-      </div>
-    </div>
-  );
+    );
+
+    return (
+        <div className="max-w-4xl mx-auto my-8 bg-white shadow-2xl rounded-xl overflow-hidden">
+            {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                </div>
+            ) : message ? (
+                <div className="text-center text-red-600 p-6">{message}</div>
+            ) : job ? (
+                <>
+                    {renderJobHeader()}
+                    {renderJobDetails()}
+                </>
+            ) : null}
+        </div>
+    );
 };
 
 export default JobDescription;

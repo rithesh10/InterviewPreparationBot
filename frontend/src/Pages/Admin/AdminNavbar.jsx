@@ -1,45 +1,29 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Shield } from "lucide-react"; // Fantasy-inspired icon
 
 const AdminNavbar = () => {
   return (
-    <nav className="bg-gray-900 text-white p-4 shadow-lg">
+    <nav className="bg-gray-800 text-white p-4">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-red-500 flex items-center space-x-2">
-          <Shield className="w-6 h-6 text-yellow-500" />
-          <span>Council of the Realm</span>
-        </h1>
-        <ul className="flex space-x-8">
+        <h1 className="text-xl font-bold">Admin Panel</h1>
+        <ul className="flex space-x-6">
           <li>
-            <Link
-              to="/admin"
-              className="hover:text-red-400 font-semibold text-lg transition-colors"
-            >
+            <Link to="/admin" className="hover:text-gray-400">
               Dashboard
             </Link>
           </li>
           <li>
-            <Link
-              to="/admin/users"
-              className="hover:text-red-400 font-semibold text-lg transition-colors"
-            >
+            <Link to="/admin/users" className="hover:text-gray-400">
               Users
             </Link>
           </li>
           <li>
-            <Link
-              to="/admin/jobs"
-              className="hover:text-red-400 font-semibold text-lg transition-colors"
-            >
+            <Link to="/admin/jobs" className="hover:text-gray-400">
               Jobs
             </Link>
           </li>
           <li>
-            <Link
-              to="/admin/settings"
-              className="hover:text-red-400 font-semibold text-lg transition-colors"
-            >
+            <Link to="/admin/settings" className="hover:text-gray-400">
               Settings
             </Link>
           </li>
