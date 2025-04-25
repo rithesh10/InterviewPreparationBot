@@ -31,39 +31,39 @@ const JobList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-6">
       <div className="container mx-auto max-w-4xl">
-        <h1 className="text-4xl font-bold text-center text-blue-800 mb-8">
-          Job Opportunities
+        <h1 className="text-4xl font-bold text-center text-yellow-500 mb-8">
+          Ravens from the Citadel
         </h1>
 
         <div className="space-y-4">
           {jobs.map((job) => (
             <div
               key={job._id}
-              className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow"
+              className="bg-gray-800 border border-gray-700 shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow"
             >
               <div className="p-6 flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-semibold text-blue-800">
+                  <h2 className="text-xl font-semibold text-yellow-400">
                     {job.title}
                   </h2>
-                  <div className="flex items-center text-gray-600 mt-2 space-x-4">
+                  <div className="flex items-center text-gray-400 mt-2 space-x-4">
                     <div className="flex items-center">
-                      <Briefcase className="mr-2 text-blue-500" />
+                      <Briefcase className="mr-2 text-red-700" />
                       <span>{job.company}</span>
                     </div>
                     <div className="flex items-center">
-                      <MapPin className="mr-2 text-blue-500" />
+                      <MapPin className="mr-2 text-red-700" />
                       <span>{job.location}</span>
                     </div>
                   </div>
                 </div>
                 <button
-                  className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                  className="bg-red-800 text-gray-200 px-6 py-2 rounded-lg hover:bg-red-900 transition-colors border border-red-700"
                   onClick={() => setSelectedJob(job)}
                 >
-                  View Details
+                  View Scroll
                 </button>
               </div>
             </div>

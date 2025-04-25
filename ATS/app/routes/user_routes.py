@@ -1,4 +1,4 @@
-from flask import Blueprint, request,json
+from flask import Blueprint, request,jsonify
 from ..controllers.user_controller import login_user, update_profile,register_user,get_user,get_all_users ,update_user,delete_user
 from app.middleware.auth_middleware import verify_jwt
 from app.utils.ApiError import ApiError

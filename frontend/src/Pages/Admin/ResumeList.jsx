@@ -42,19 +42,19 @@ const ResumeList = () => {
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6 mt-8">
+    <div className="bg-gray-900 text-white shadow-2xl rounded-lg p-8 mt-8">
       {/* Buttons */}
-      <div className="flex justify-center items-center space-x-4 py-3">
+      <div className="flex justify-center items-center space-x-6 py-4">
         <button
           onClick={calculateScores}
-          className="rounded-md bg-red-500 py-2 px-4 font-semibold text-white hover:bg-red-600 transition"
+          className="rounded-md bg-red-700 py-2 px-5 font-semibold text-white hover:bg-red-800 transition"
         >
           Calculate Scores
         </button>
 
         {/* Pass jobId to ResumeRankings */}
         <Link to={`/admin/resume-rankings/${id}`}>
-          <button className="rounded-md bg-blue-500 py-2 px-4 font-semibold text-white hover:bg-blue-600 transition">
+          <button className="rounded-md bg-indigo-700 py-2 px-5 font-semibold text-white hover:bg-indigo-800 transition">
             View Rankings
           </button>
         </Link>
@@ -62,7 +62,7 @@ const ResumeList = () => {
 
       {/* Error Message */}
       {error && <ErrorAlert message={error} />}
-      {message && <p className="text-gray-600">{message}</p>}
+      {message && <p className="text-gray-400 text-center">{message}</p>}
 
       {/* Loading or Resume List */}
       {isLoading ? (
@@ -70,17 +70,17 @@ const ResumeList = () => {
       ) : resumes.length === 0 ? (
         <p className="text-center text-gray-500">No resumes received.</p>
       ) : (
-        <ul className="space-y-4 mt-4">
+        <ul className="space-y-6 mt-6">
           {resumes.map((resume) => (
             <li
               key={resume._id}
-              className="flex items-center justify-between border-b pb-3"
+              className="flex items-center justify-between border-b pb-4 border-gray-700"
             >
               {/* Link to individual resume details */}
               <Link to={`/admin/resumes/resume/${resume._id}`}>
-                <button className="text-blue-600 font-medium hover:underline flex flex-col">
+                <button className="text-yellow-400 font-medium hover:underline flex flex-col">
                   <span className="font-semibold">Experience: {resume.experience} years</span>
-                  <span className="text-sm text-gray-600">{resume.user_name}</span>
+                  <span className="text-sm text-gray-300">{resume.user_name}</span>
                 </button>
               </Link>
             </li>

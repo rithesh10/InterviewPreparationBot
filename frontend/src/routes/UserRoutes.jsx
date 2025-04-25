@@ -17,7 +17,7 @@ const UserRoutes = () => {
         <Route path="upload-resume" element={<ResumeUpload />} />
         <Route path="jobs" element={<JobList />} />
       </Route>
-    </Routes>
+    </Routes> 
     </>
   )
 }

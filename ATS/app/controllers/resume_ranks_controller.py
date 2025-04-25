@@ -1,9 +1,23 @@
 from flask import Blueprint, request, jsonify
 from bson import ObjectId
 from datetime import datetime,timezone
+
 from app import mongo  # Import MongoDB instance
 from app.models.Ranking_Model import resume_ranking_schema,resume_rankings_schema
 from app.ML.main import find_the_fields,find_the_score
+# def get_resume_ranking(request, id):
+#     try:
+#         object_id = ObjectId(id)
+#     except InvalidId:
+#         return JsonResponse({"error": "Invalid ID format"}, status=400)
+
+#     ranking = db.resume_rankings.find_one({"_id": object_id})
+#     if not ranking:
+#         return JsonResponse({"error": "Resume ranking not found"}, status=404)
+
+#     ranking["_id"] = str(ranking["_id"])
+#     serialized = resume_ranking_schema.dump(ranking)
+#     return JsonResponse(serialized, status=200)
 def add_resume_ranking():
     data = request.json
 
@@ -63,7 +77,7 @@ from flask import jsonify
 def get_all_resume_rankings(id):
     try:
         # Ensure job_id is treated correctly
-        rankings = list(mongo.db.resume_rankings.find({"job_id": id}))
+        rankings = list(mongo.db.resume_rankings.find({"job_id": id}).sort("ai_score", -1))
 
         if not rankings:
             return jsonify({"message": "No resume rankings found for this job"}), 404
@@ -71,6 +85,10 @@ def get_all_resume_rankings(id):
         # Convert ObjectId fields to string for JSON serialization
         for ranking in rankings:
             ranking["_id"] = str(ranking["_id"])
+            # print(ranking)
+            user=mongo.db.users.find_one({"_id":ObjectId(ranking["user_id"])})
+            # print(user["full_name"])
+            ranking["full_name"]=user["full_name"]
 
         return jsonify(rankings), 200
 
@@ -118,7 +136,7 @@ def get_resumes_by_matching_skills():
 
     return jsonify(resume_rankings_schema.dump(rankings)), 200
 def add_resume_ranking_for_job(job_id):
-    """Process all resumes associated with a given job_id and rank them."""
+    """Process all resumes associated with a given job_id and rank them if not already ranked."""
     # Fetch all resumes for the job
     resumes = list(mongo.db.resume.find({"job_id": job_id}))
     job = mongo.db.jobs.find_one({"_id": ObjectId(job_id)})
@@ -131,6 +149,7 @@ def add_resume_ranking_for_job(job_id):
         "Mid-Level": 2,
         "Senior": 5
     }
+    print("processing")
     job_experience_level = job.get("experience_level", 0)
     if isinstance(job_experience_level, str):
         job_experience_level = experience_mapping.get(job_experience_level, 0)
@@ -138,26 +157,37 @@ def add_resume_ranking_for_job(job_id):
     ranked_resumes = []  # List to store ranked resumes before insertion
 
     for resume in resumes:
+        # Check if this resume has already been ranked for this job
+        existing_ranking = mongo.db.resume_rankings.find_one({
+            "resume_id": str(resume["_id"]),
+            "job_id": job_id
+        })
+
+        if existing_ranking:
+            continue  # Skip already ranked resume
+
         ai_score = find_the_score(resume["resume_text"], job["description"])
         matching_skills = find_the_fields(resume["resume_text"], job["skills_required"])
         missing_skills = [skill for skill in job["skills_required"] if skill not in matching_skills]
-        user_id=resume["user_id"]
+        user_id = resume["user_id"]
 
         ranking_data = {
             "resume_id": str(resume["_id"]),
             "job_id": job_id,
             "ai_score": ai_score,
-            "user_id":user_id,
+            "user_id": user_id,
             "matching_skills": matching_skills,
             "missing_skills": missing_skills,
             "suggestions": "Improve your skills to match the job requirements",
             "experience_match": resume["experience"] >= job_experience_level
-        
         }
 
         ranked_resumes.append(ranking_data)
 
-    # Bulk insert rankings into MongoDB
-    mongo.db.resume_rankings.insert_many(ranked_resumes)
+    if ranked_resumes:
+        mongo.db.resume_rankings.insert_many(ranked_resumes)
 
-    return jsonify({"message": "Resume rankings added successfully", "count": len(ranked_resumes)}), 201
+    return jsonify({
+        "message": "Resume rankings processed successfully",
+        "new_rankings_added": len(ranked_resumes)
+    }), 201

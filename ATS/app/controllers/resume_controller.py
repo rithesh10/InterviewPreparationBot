@@ -12,7 +12,7 @@ from bson import ObjectId,json_util
 resume_schema=ResumeSchema()
 
 UPLOAD_FOLDER = "public/temp"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)   
 
 ALLOWED_EXTENSIONS = {"pdf", "docx"}
 
@@ -47,10 +47,7 @@ def extract_text(file, filename):
 
 def upload_resume():
     try:
-        # ✅ 1. Check if the file exists
-        
-        # ✅ Make sure request.user exists before accessing "_id"
-        # print(g.user._id)
+     
 
         if "resume" not in request.files:
             return jsonify({"error": "No file part"}), 400
@@ -62,7 +59,7 @@ def upload_resume():
 
         filename = secure_filename(file.filename)
 
-        # ✅ 2. Validate file type
+      
         if not allowed_file(filename):
             return jsonify({"error": "Invalid file type. Only PDF and DOCX allowed"}), 400
 

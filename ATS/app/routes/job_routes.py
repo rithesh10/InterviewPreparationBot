@@ -9,8 +9,6 @@ job_bp = Blueprint("jobs", __name__)
 def create_job():
    data=request.get_json()
    return createJob(data)
-
-
 # Get All Jobs
 @job_bp.route("/jobs", methods=["GET"])
 @verify_jwt
@@ -23,9 +21,6 @@ def get_all_jobs():
 @verify_jwt
 def get_job(id):
     return getJobById(id)
-
-   
-
 # Update Job by ID
 @job_bp.route("/jobs/<id>", methods=["PUT"])
 @verify_jwt

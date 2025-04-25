@@ -18,38 +18,40 @@ const JobList = ({ jobs, fetchResumes, setSelectedJob, fetchJobs }) => {
   };
 
   return (
-    <div className="bg-white shadow-xl rounded-xl p-6">
-      <h3 className="text-2xl font-semibold mb-4 flex items-center">
-        <FileText className="mr-2 text-blue-600" /> Job Listings
+    <div className="bg-[#fdf6e3] border-2 border-yellow-800 shadow-2xl rounded-2xl p-6">
+      <h3 className="text-3xl font-bold mb-6 flex items-center text-yellow-900">
+        <FileText className="mr-3 text-yellow-700" /> Quests of the Realm
       </h3>
       {jobs.length === 0 ? (
-        <p className="text-gray-500">No jobs posted yet.</p>
+        <p className="text-gray-700 italic">No quests have been declared yet.</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-5">
           {jobs.map((job) => (
             <li
               key={job._id}
-              className="bg-blue-50 rounded-lg p-4 flex justify-between items-center hover:bg-blue-100 transition-colors"
+              className="bg-[#fffaf0] border border-yellow-700 rounded-xl p-5 flex justify-between items-center hover:bg-yellow-100 transition-colors duration-200"
             >
-              <Link to={`/job/${job._id}`} className="flex-1">
-                <h4 className="font-bold text-blue-800">{job.title}</h4>
-                <p className="text-gray-600">{job.company}</p>
+              <Link to={`/admin/job/${job._id}`} className="flex-1">
+
+                <h4 className="text-xl font-semibold text-yellow-900">{job.title}</h4>
+                <p className="text-gray-700 italic">House {job.company}</p>
               </Link>
-              <div className="flex space-x-2">
+              <div className="flex space-x-3">
                 <Link to={`/admin/resumes/${job._id}`}>
                   <button
                     onClick={() => {
                       setSelectedJob(job);
                       fetchResumes(job._id);
                     }}
-                    className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+                    className="bg-blue-900 text-white px-4 py-2 rounded-md hover:bg-blue-800 shadow-sm"
                   >
-                    View Resumes
+                    View Ravens
                   </button>
                 </Link>
                 <button
                   onClick={() => handleDeleteJob(job._id)}
-                  className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
+                  className="bg-red-800 text-white px-3 py-2 rounded-md hover:bg-red-700 shadow-sm"
+                  title="Banish Quest"
                 >
                   <Trash2 size={18} />
                 </button>

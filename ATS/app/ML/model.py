@@ -6,7 +6,7 @@ pickle_path = os.path.join(base_dir, "SentenceTransformer.pkl")
 try:
     with open(pickle_path, "rb") as f:
         model, category_columns, category_embeddings = pickle.load(f)
-    print("✅ Model loaded successfully!")
+    print("✅ Model  successfully!")
 except Exception as e:
     print(f"❌ Error loading model: {e}")
     model, category_columns, category_embeddings = None, None, None

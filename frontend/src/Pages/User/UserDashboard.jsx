@@ -85,9 +85,9 @@ const UserDashboard = () => {
 
   const getStatusIcon = (status) => {
     switch(status) {
-      case 'Applied': return <Clock className="text-yellow-500" />;
-      case 'Interview': return <CheckCircle className="text-green-500" />;
-      case 'Rejected': return <XCircle className="text-red-500" />;
+      case 'Applied': return <Clock className="text-amber-500" />;
+      case 'Interview': return <CheckCircle className="text-green-600" />;
+      case 'Rejected': return <XCircle className="text-red-700" />;
       default: return null;
     }
   };
@@ -99,51 +99,51 @@ const UserDashboard = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-gray-50">
+    <div className="w-screen min-h-screen p-6 bg-gray-900 flex justify-center items-start">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Profile Section */}
-        <div className="bg-white shadow-md rounded-lg p-6">
+        <div className="bg-gray-800 shadow-md rounded-lg p-6 border border-gray-700">
           <div className="flex items-center mb-4">
-            <User className="w-16 h-16 text-blue-500 mr-4" />
+            <User className="w-16 h-16 text-yellow-500 mr-4" />
             <div>
-              <h2 className="text-xl font-bold">{user.full_name}</h2>
-              <p className="text-gray-500">{user.email}</p>
+              <h2 className="text-xl font-bold text-gray-200">{user.full_name}</h2>
+              <p className="text-gray-400">{user.email}</p>
             </div>
           </div>
           
           <div className="mb-4">
-            <div className="flex justify-between mb-2">
+            <div className="flex justify-between mb-2 text-gray-300">
               <span>Profile Completeness</span>
               {/* <span>{user.profileCompleteness}%</span> */}
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div className="w-full bg-gray-700 rounded-full h-2.5">
               <div 
-                className="bg-blue-600 h-2.5 rounded-full" 
+                className="bg-red-700 h-2.5 rounded-full" 
                 style={{width: `${user.profileCompleteness}%`}}
               ></div>
             </div>
           </div>
           
-          <button className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+          <button className="w-full bg-red-800 text-white py-2 rounded hover:bg-red-900 border border-red-700">
             Complete Profile
           </button>
         </div>
 
         {/* Job Applications */}
-        <div className="bg-white shadow-md rounded-lg p-6">
+        <div className="bg-gray-800 shadow-md rounded-lg p-6 border border-gray-700">
           <div className="flex items-center mb-4">
-            <Briefcase className="w-6 h-6 mr-2 text-blue-500" />
-            <h3 className="text-lg font-semibold">My Applications</h3>
+            <Briefcase className="w-6 h-6 mr-2 text-yellow-500" />
+            <h3 className="text-lg font-semibold text-gray-200">My Applications</h3>
           </div>
           
           {jobApplications.map(application => (
-            <div key={application.id} className="mb-4 border-b pb-4">
+            <div key={application.id} className="mb-4 border-b border-gray-700 pb-4">
               <div className="flex justify-between items-center">
                 <div>
-                  <h4 className="font-medium">{application.position}</h4>
-                  <p className="text-gray-500">{application.company}</p>
+                  <h4 className="font-medium text-gray-200">{application.position}</h4>
+                  <p className="text-gray-400">{application.company}</p>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center text-gray-300">
                   {getStatusIcon(application.status)}
                   <span className="ml-2">{application.status}</span>
                 </div>
@@ -152,7 +152,7 @@ const UserDashboard = () => {
                 {application.applicationProgress.map((stage, index) => (
                   <div 
                     key={index} 
-                    className={`h-1 ${stage.completed ? 'bg-green-500' : 'bg-gray-300'} inline-block mr-1 w-16`}
+                    className={`h-1 ${stage.completed ? 'bg-yellow-600' : 'bg-gray-600'} inline-block mr-1 w-16`}
                   ></div>
                 ))}
               </div>
@@ -163,25 +163,25 @@ const UserDashboard = () => {
         {/* Notifications & Recommended Jobs */}
         <div>
           {/* Notifications */}
-          <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+          <div className="bg-gray-800 shadow-md rounded-lg p-6 mb-6 border border-gray-700">
             <div className="flex items-center mb-4">
-              <Bell className="w-6 h-6 mr-2 text-blue-500" />
-              <h3 className="text-lg font-semibold">Notifications</h3>
+              <Bell className="w-6 h-6 mr-2 text-yellow-500" />
+              <h3 className="text-lg font-semibold text-gray-200">Notifications</h3>
             </div>
             
             {notifications.map(notification => (
               <div 
                 key={notification.id} 
-                className={`p-4 mb-2 rounded ${!notification.read ? 'bg-blue-50' : 'bg-gray-100'} flex justify-between items-center`}
+                className={`p-4 mb-2 rounded ${!notification.read ? 'bg-gray-700' : 'bg-gray-800'} flex justify-between items-center border border-gray-600`}
               >
                 <div>
-                  <p className="text-sm">{notification.message}</p>
+                  <p className="text-sm text-gray-300">{notification.message}</p>
                   <p className="text-xs text-gray-500">{notification.date}</p>
                 </div>
                 {!notification.read && (
                   <button 
                     onClick={() => markNotificationAsRead(notification.id)}
-                    className="text-blue-500 text-sm"
+                    className="text-yellow-500 text-sm"
                   >
                     Mark as Read
                   </button>
@@ -191,21 +191,21 @@ const UserDashboard = () => {
           </div>
 
           {/* Recommended Jobs */}
-          <div className="bg-white shadow-md rounded-lg p-6">
+          <div className="bg-gray-800 shadow-md rounded-lg p-6 border border-gray-700">
             <div className="flex items-center mb-4">
-              <Search className="w-6 h-6 mr-2 text-blue-500" />
-              <h3 className="text-lg font-semibold">Recommended Jobs</h3>
+              <Search className="w-6 h-6 mr-2 text-yellow-500" />
+              <h3 className="text-lg font-semibold text-gray-200">Recommended Jobs</h3>
             </div>
             
             {recommendedJobs.map(job => (
-              <div key={job.id} className="mb-4 border-b pb-4">
-                <h4 className="font-medium">{job.title}</h4>
-                <p className="text-gray-500">{job.company}</p>
+              <div key={job.id} className="mb-4 border-b border-gray-700 pb-4">
+                <h4 className="font-medium text-gray-200">{job.title}</h4>
+                <p className="text-gray-400">{job.company}</p>
                 <div className="flex justify-between items-center mt-2">
-                  <span className="text-sm text-green-600">{job.location}</span>
-                  <span className="text-sm font-bold">{job.salary}</span>
+                  <span className="text-sm text-yellow-600">{job.location}</span>
+                  <span className="text-sm font-bold text-gray-300">{job.salary}</span>
                 </div>
-                <button className="mt-2 w-full bg-green-500 text-white py-1 rounded hover:bg-green-600">
+                <button className="mt-2 w-full bg-red-800 text-white py-1 rounded hover:bg-red-900 border border-red-700">
                   Apply Now
                 </button>
               </div>
