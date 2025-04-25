@@ -120,3 +120,37 @@ def answer_question():
     
     # Return the next question to the client
     return jsonify({"question": next_question})
+from flask import request, jsonify
+from datetime import datetime
+
+def summary_of_text():
+    """Summarizes the resume and job description to extract key points."""
+    data = request.json
+    resume = data.get("resume")
+    job_description = data.get("job_description")
+    
+    if not resume or not job_description:
+        return jsonify({"error": "Both resume and job description are required"}), 400
+    
+    # Create a prompt to summarize the resume
+    resume_prompt = f"""
+    You are a summarizer. Given the following resume, extract the key skills, experience, and technologies used. Provide a concise summary of the important points.
+    Resume: {resume}
+    """
+    
+    # Generate resume summary
+    resume_summary = model.generate_content(resume_prompt)
+    resume_summary = resume_summary.text  # Assuming this is how you get the summary from your model
+    
+    # Create a prompt to summarize the job description
+    job_desc_prompt = f"""
+    You are a summarizer. Given the following job description, extract the key responsibilities, skills required, and any important details. Provide a concise summary of the job.
+    Job Description: {job_description}
+    """
+    
+    # Generate job description summary
+    job_summary = model.generate_content(job_desc_prompt)
+    job_summary = job_summary.text  # Assuming this is how you get the summary from your model
+    
+    # Return the summaries as a response
+    return jsonify({"resume_summary": resume_summary, "job_description_summary": job_summary}), 200
