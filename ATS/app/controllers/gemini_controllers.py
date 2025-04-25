@@ -4,6 +4,7 @@ from datetime import datetime
 from db.db import mongo
 import asyncio
 from bson import ObjectId,json_util
+import json
 API_KEY="AIzaSyBXHxyQvTsXUoDB8pWiT0CF7ilGZoMzSE0"
 
 
@@ -110,7 +111,7 @@ def answer_question():
         )
         
         # Return the conclusion message to the client
-        return jsonify({"question": conclusion_message, "status": "concluded"})
+        return jsonify({"question": conclusion_message, "status": "concluded","interview_score":True})
     
     # Update the interview session in MongoDB
     mongo.db.interview_sessions.update_one(
@@ -119,7 +120,7 @@ def answer_question():
     )
     
     # Return the next question to the client
-    return jsonify({"question": next_question})
+    return jsonify({"question": next_question,"interview_score":False})
 from flask import request, jsonify
 from datetime import datetime
 
@@ -154,3 +155,73 @@ def summary_of_text():
     
     # Return the summaries as a response
     return jsonify({"resume_summary": resume_summary, "job_description_summary": job_summary}), 200
+import re
+def calculate_score(id):
+    try:
+        # Fetch the interview session data from the database
+        object_id = ObjectId(id)
+        interview_data = mongo.db.interview_sessions.find_one({"_id": object_id})
+        
+        # Check if interview_data was found
+        if not interview_data:
+            return jsonify({"error": "Interview session not found"}), 404
+        
+        qa_data = interview_data.get("qa_history")
+
+        # Ensure qa_data exists
+        if not qa_data:
+            return jsonify({"error": "Q&A history is missing"}), 400
+        
+        # Build the prompt for the AI model
+        prompt = f"""
+        You are an expert interview analysis agent. Your task is to evaluate the interview session based on the provided Q&A data below.
+
+        Q&A History:
+        {qa_data}
+
+        Please return your analysis strictly in the following JSON format:
+
+        {{
+          "score": <integer, 0-100>,
+          "summary": "<brief summary of the candidate's overall performance>",
+          "strengths": ["<point 1>", "<point 2>", "..."],
+          "weaknesses": ["<point 1>", "<point 2>", "..."],
+          "suggestions": ["<actionable recommendation 1>", "..."],
+          "communication_skills": "<evaluation of clarity, confidence, and articulation>",
+          "technical_knowledge": "<evaluation of domain and technical understanding>",
+          "soft_skills": "<evaluation of professionalism, problem-solving, etc.>",
+          "red_flags": ["<if any major concerns>", "..."]
+        }}
+
+        Be objective, concise, and base your analysis only on the provided Q&A history.
+        """
+
+        # Call the model to generate content based on the prompt
+        response = model.generate_content(prompt)
+
+        # Check if the response is empty or invalid
+        if not response or not hasattr(response, 'text') or not response.text.strip():
+            return jsonify({"error": "Received empty or invalid response from the model"}), 500
+
+        # Print the raw response for debugging (you can remove this in production)
+        print("Raw response from model:", response.text)
+
+        # Use regex to remove the ```json and ``` backticks
+        response_text = re.sub(r'```json|```', '', response.text).strip()
+
+        # Try parsing the JSON response
+        try:
+            result = json.loads(response_text)
+        except json.JSONDecodeError as e:
+            return jsonify({"error": f"Failed to parse the model response as JSON: {str(e)}"}), 500
+
+        # Ensure the result is in the correct format
+        if not isinstance(result, dict):
+            return jsonify({"error": "Invalid response format from model"}), 500
+        
+        # Successfully return the generated content
+        return jsonify(result), 200
+    
+    except Exception as e:
+        # Catch any other unexpected errors
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
