@@ -11,6 +11,7 @@ class Config:
     CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_CLOUD_KEY")
     CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_CLOUD_SECRET")
     FOLDER=UPLOAD_FOLDER
+    API_KEY=os.getenv("API_KEY")
 
     if not MONGO_URI:
         raise ValueError("❌ MONGO_URI is missing in environment variables!")

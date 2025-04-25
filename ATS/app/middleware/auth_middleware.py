@@ -10,6 +10,7 @@ SECRET_KEY = os.getenv("ACCESS_TOKEN_SECRET")  # You can store this in config
 def verify_jwt(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        print("hello")
         token = request.cookies.get('accessToken') or request.headers.get('Authorization')
         if token and token.startswith('Bearer '):
             token = token.replace('Bearer ', '')
