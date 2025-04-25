@@ -20,11 +20,7 @@ const AdminRoutes = () => {
                 {/* <Route path="jobs" element={}/> */}
                 <Route path='job/:id' element={<JobDescription/>}/>
               </Route>
-
             </Routes>
-
-        
-
     </div>
   )
 }
