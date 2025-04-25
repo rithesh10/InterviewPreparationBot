@@ -18,16 +18,16 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-blue-600 shadow-md w-screen">
+    <nav className="bg-gradient-to-r from-blue-600 to-blue-500 shadow-md w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link
               to="/user"
-              className="text-2xl font-bold text-white hover:text-gray-200"
+              className="text-3xl font-extrabold text-white hover:text-gray-200 transition duration-300"
             >
-              JobPortal
+              SkillUp
             </Link>
           </div>
 
@@ -67,19 +67,13 @@ const Navbar = () => {
           <div className="hidden md:flex md:items-center md:space-x-6">
             <Link
               to="/user"
-              className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium"
+              className="text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition duration-300"
             >
               Dashboard
             </Link>
             <Link
-              to="/user/upload-resume"
-              className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Upload Resume
-            </Link>
-            <Link
               to="/user/jobs"
-              className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium"
+              className="text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition duration-300"
             >
               Job Listings
             </Link>
@@ -94,7 +88,7 @@ const Navbar = () => {
             )}
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-300"
             >
               Logout
             </button>
@@ -103,23 +97,17 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-blue-500">
+          <div className="md:hidden bg-blue-600">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <Link
                 to="/user"
-                className="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition duration-300"
               >
                 Dashboard
               </Link>
               <Link
-                to="/user/upload-resume"
-                className="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium"
-              >
-                Upload Resume
-              </Link>
-              <Link
                 to="/user/jobs"
-                className="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium transition duration-300"
               >
                 Job Listings
               </Link>
@@ -135,7 +123,7 @@ const Navbar = () => {
                   <div className="mt-3 space-y-1">
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-3 py-2 text-base font-medium text-white hover:bg-red-500 hover:text-gray-100"
+                      className="block w-full text-left px-3 py-2 text-base font-medium text-white hover:bg-red-500 hover:text-gray-100 transition duration-300"
                     >
                       Logout
                     </button>
