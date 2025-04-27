@@ -9,7 +9,6 @@ const Interview = ({ userId }) => {
 
   // Handle the case where userId is not available
   useEffect(() => { 
-    console.log("second" + userId);
     if (!userId) {
       setError("No user ID provided.");
     } else {
@@ -29,9 +28,7 @@ const Interview = ({ userId }) => {
 
     try {
       const response = await axios.get(
-        `${config.backendUrl}/get-resume-by-userId/${userId}`, 
-        { withCredentials: true }
-      );
+        `${config.backendUrl}/get-resume-by-userId/${userId}`);
       console.log("data1"+response.data);
       // Handle successful response
       if (response.data) {

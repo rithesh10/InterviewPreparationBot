@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from bson import ObjectId
 from datetime import datetime,timezone
+import re
 
 from app import mongo  # Import MongoDB instance
 from app.models.Ranking_Model import resume_ranking_schema,resume_rankings_schema
@@ -11,56 +12,101 @@ API_KEY="AIzaSyBXHxyQvTsXUoDB8pWiT0CF7ilGZoMzSE0"
 # # Your Gemini API Key
 import google.generativeai as genai
 genai.configure(api_key=API_KEY)
-
+import json
 
 # # Create the model instance
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
-def add_resume_ranking():
-    data = request.json
+def add_resume_ranking_by_ResumeId(id):
+    try:
+        # Fetch resume and job details
+        resume = mongo.db.resume.find_one({"_id": ObjectId(id)})
+        if not resume:
+            return jsonify({"error": "Resume not found"}), 404
 
-    # Fetch resume and job details
-    resume = mongo.db.resume.find_one({"_id": ObjectId(data["resume_id"])})
-    job = mongo.db.jobs.find_one({"_id": ObjectId(data["job_id"])})
+        job = mongo.db.jobs.find_one({"_id": ObjectId(resume["job_id"])})
+        if not job:
+            return jsonify({"error": "Job not found"}), 404
 
-    if not job or not resume:
-        return jsonify({"message": "Couldn't find the resume or job data"}), 404
+        # Prepare prompt for Gemini
+        prompt = f"""
+        You are an expert recruiter.  
+        I will give you:
 
-    # AI-based scoring & skill matching
-    ai_score = find_the_score(resume["resume_text"], job["description"])
-    matching_skills = find_the_fields(resume["resume_text"], job["skills_required"])
-    print(matching_skills)
+        - A resume text
+        - A job description
+        - A list of skills required for the job
 
-    # Identify missing skills (skills required by job but not in resume)
-    missing_skills = [skill for skill in job["skills_required"] if skill not in matching_skills]
-    experience_mapping = {
-    "Entry-Level": 0,
-    "Mid-Level": 2,
-    "Senior": 5
+        Your tasks:
+        1. Find which skills from the skills_required list are present in the resume.
+        2. Score the resume out of 100 based on how well it matches the skills and the description.
+
+        Return the result strictly in JSON format like this:
+        {{
+          "score": 92,
+          "matching_skills": ["JavaScript", "React", "Node.js"]
+        }}
+
+        Here is the resume:
+        \"\"\"{resume['resume_text']}\"\"\"
+
+        Here is the job description:
+        \"\"\"{job['description']}\"\"\"
+
+        Here is the list of skills required:
+        {job['skills_required']}
+        """
+
+        # Call Gemini model
+        response = model.generate_content(prompt)
+        response_text = re.sub(r'```json|```', '', response.text).strip()
+        parsed_response = json.loads(response_text)
+
+        print("Gemini Raw Response:", response.text)
+        print("Parsed Response:", parsed_response)
+
+        ai_score = parsed_response.get("score", 0)
+        matching_skills = parsed_response.get("matching_skills", [])
+
+        # Identify missing skills
+        missing_skills = [skill for skill in job["skills_required"] if skill not in matching_skills]
+
+        # Handle experience matching
+        experience_mapping = {
+            "Entry-Level": 0,
+            "Mid-Level": 2,
+            "Senior": 5
         }
-    job_experience_level = job["experience_level"]
+        job_experience_level = job.get("experience_level", 0)
+        if isinstance(job_experience_level, str):
+            job_experience_level = experience_mapping.get(job_experience_level, 0)
 
-# Ensure job experience is an integer
-    if isinstance(job_experience_level, str):
-         job_experience_level = experience_mapping.get(job_experience_level, 0)
-    # Construct the ranking data
-    data.update({
-        "ai_score": ai_score,
-        "matching_skills": matching_skills,
-        "missing_skills": missing_skills,
-        "suggestions": "Improve your skills to match the job requirements",
-        "experience_match": resume["experience"] >= job_experience_level,
-        # "created_at": datetime.now()  # Local time
-    })
+        # Construct the data to insert
+        ranking_data = {
+            "resume_id": str(resume["_id"]),
+            "job_id": str(job["_id"]),
+            "user_id": resume["user_id"],
+            "ai_score": ai_score,
+            "matching_skills": matching_skills,
+            "missing_skills": missing_skills,
+            "suggestions": "Improve your skills to match the job requirements",
+            "experience_match": resume.get("experience", 0) >= job_experience_level,
+        }
 
-    # Validate data against schema
-    errors = resume_ranking_schema.validate(data)
-    if errors:
-        return jsonify({"error": errors}), 400
+        # Insert into DB
+        resume_score_data = {}
+        try:
+            resume_score_data = mongo.db.resume_rankings.insert_one(ranking_data)
+        except Exception as db_error:
+            print("Database Insert Error:", str(db_error))
+            return jsonify({"error": "Failed to save ranking to database"}), 500
 
-    # Insert into database
-    inserted_id = mongo.db.resume_rankings.insert_one(data).inserted_id
+        # Option 1: Just return inserted_id
+        return jsonify({"inserted_id": str(resume_score_data.inserted_id)}), 201
 
-    return jsonify({"message": "Resume ranking added", "id": str(inserted_id)}), 201
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+
 def get_resume_ranking(id):
     ranking = mongo.db.resume_rankings.find_one({"_id": ObjectId(id)})
     if not ranking:

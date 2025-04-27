@@ -8,7 +8,8 @@ from docx import Document
 from app.models.Resume_Model import ResumeSchema
 from datetime import datetime,timezone
 from db.db import mongo
-from bson import ObjectId,json_util
+from bson import json_util, ObjectId
+
 resume_schema=ResumeSchema()
 
 UPLOAD_FOLDER = "public/temp"
@@ -118,8 +119,6 @@ def upload_resume():
     except Exception as e:
         print(str(e))
         return jsonify({"error": str(e)}), 500
-from flask import jsonify
-from bson import json_util, ObjectId
 
 def get_by_jobId(id):
     resumes = mongo.db.resume.find({"job_id": id})  # Fetch resumes matching job_id
@@ -137,8 +136,6 @@ def get_by_jobId(id):
         "resumes": resumes_list  # Directly return list (no need for json_util.dumps)
     }), 200
 
-from flask import jsonify
-from bson import ObjectId, json_util
 def get_by_user_id(id):
     try:
         object_id=ObjectId(id)

@@ -1,17 +1,17 @@
 from flask import Blueprint, request, jsonify
 from app.middleware.auth_middleware import verify_jwt
 from app.controllers.resume_ranks_controller import (
-    add_resume_ranking, get_all_resume_rankings, get_resume_ranking,
+    add_resume_ranking_by_ResumeId, get_all_resume_rankings, get_resume_ranking,
     get_resumes_by_matching_skills, get_top_n_resumes,
     update_resume_ranking, delete_resume_ranking,add_resume_ranking_for_job
 )
 
 resume_ranking_bp = Blueprint("ranking", __name__)
 
-@resume_ranking_bp.route("/resume-rankings", methods=["POST"])
+@resume_ranking_bp.route("/resume-rankings-by-resume-id/<id>", methods=["GET"])
 # @verify_jwt()
-def secure_add_resume_ranking():
-    return add_resume_ranking()
+def secure_add_resume_ranking(id):
+    return add_resume_ranking_by_ResumeId(id)
 
 @resume_ranking_bp.route("/resume-rankings/<id>", methods=["GET"])
 # @verify_jwt()
