@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 def init_mongo(app):
     """Initialize MongoDB connection."""
-    print(os.getenv("MONGO_URI"))
-    print(app.config.get("MONGO_URI"))
+    # print(os.getenv("MONGO_URI"))
+    # print(app.config.get("MONGO_URI"))
     app.config['SESSION_TYPE'] = 'filesystem'
     app.config["MONGO_URI"] = os.getenv("MONGO_URI")  # Ensure MongoDB URI is set
     mongo.init_app(app)  # Bind MongoDB to Flask app
