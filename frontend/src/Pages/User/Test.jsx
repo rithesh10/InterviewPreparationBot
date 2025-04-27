@@ -1,104 +1,219 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import config from "../../config/config"; // Assuming backend URL config
+import axios from "axios";
 
-const questionsSet = [
-  {
-    id: 1,
-    question: "What is the capital of France?",
-    options: ["London", "Berlin", "Paris", "Madrid"],
-    correctAnswer: "Paris",
-  },
-  {
-    id: 2,
-    question: "Which planet is known as the Red Planet?",
-    options: ["Earth", "Mars", "Jupiter", "Saturn"],
-    correctAnswer: "Mars",
-  },
-  {
-    id: 3,
-    question: "Who wrote 'Romeo and Juliet'?",
-    options: ["William Shakespeare", "Mark Twain", "Leo Tolstoy", "Charles Dickens"],
-    correctAnswer: "William Shakespeare",
-  },
-  {
-    id: 4,
-    question: "Which element has the chemical symbol 'O'?",
-    options: ["Gold", "Oxygen", "Silver", "Iron"],
-    correctAnswer: "Oxygen",
-  },
-  {
-    id: 5,
-    question: "What is the largest ocean on Earth?",
-    options: ["Atlantic Ocean", "Indian Ocean", "Pacific Ocean", "Arctic Ocean"],
-    correctAnswer: "Pacific Ocean",
-  },
-];
+const Test = ({ resumeText, jobDescription, onBack, userId }) => {
+  const [currentAnswer, setCurrentAnswer] = useState("");
+  const [question, setQuestion] = useState("");
+  const [interviewId, setInterviewId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [assessmentResult, setAssessmentResult] = useState(null);
+  const [error, setError] = useState(null);
 
-const Test = () => {
-  const [answers, setAnswers] = useState({});
-  const [showResult, setShowResult] = useState(false);
-  const [score, setScore] = useState(0);
+  useEffect(() => {
+    // Start the interview session when the component mounts
+    startInterviewSession();
+  }, []);
 
-  const handleOptionChange = (questionId, selectedOption) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: selectedOption,
-    }));
+  const startInterviewSession = async () => {
+    try {
+      setIsLoading(true);
+      // Start the interview directly with the provided resumeText and jobDescription
+      const response = await axios.post(`${config.backendUrl}/gemini/start_interview_session`, {
+        resume_summary: resumeText,
+        jd_summary: jobDescription
+      }, {
+        withCredentials: true,
+      });
+
+      setQuestion(response.data.question);
+      setInterviewId(response.data.interview_id);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error starting interview:", error);
+      setError("Failed to start the interview. Please try again.");
+      setIsLoading(false);
+    }
   };
 
-  const handleSubmit = () => {
-    let tempScore = 0;
-    questionsSet.forEach((q) => {
-      if (answers[q.id] === q.correctAnswer) {
-        tempScore += 1;
+  const handleAnswerChange = (e) => {
+    setCurrentAnswer(e.target.value);
+  };
+
+  const handleSubmitAnswer = async () => {
+    if (!currentAnswer.trim()) {
+      setError("Please provide an answer before submitting.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Submit the answer to the backend
+      const response = await axios.post(`${config.backendUrl}/gemini/answer_interview_question`, {
+        interview_id: interviewId,
+        answer: currentAnswer
+      }, {
+        withCredentials: true,
+      });
+
+      // Check if interview is concluded
+      if (response.data.status === "concluded" || response.data.interview_score === true) {
+        setIsCompleted(true);
+        // Fetch the interview assessment
+        fetchInterviewScore();
+      } else {
+        // Set the next question
+        setQuestion(response.data.question);
+        setCurrentAnswer(""); // Clear the answer field for the next question
       }
-    });
-    setScore(tempScore);
-    setShowResult(true);
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error submitting answer:", error);
+      setError("Failed to submit your answer. Please try again.");
+      setIsLoading(false);
+    }
   };
+
+  const fetchInterviewScore = async () => {
+    try {
+      const response = await axios.get(`${config.backendUrl}/gemini/calculate-scores/${interviewId}`, {
+        withCredentials: true,
+      });
+      setAssessmentResult(response.data);
+    } catch (error) {
+      console.error("Error fetching interview score:", error);
+      setError("Failed to calculate interview score.");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg text-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-2xl font-bold mb-6 text-center">Quick Test</h1>
-
-      {!showResult ? (
-        <>
-          <div className="space-y-8">
-            {questionsSet.map((q) => (
-              <div key={q.id} className="space-y-2">
-                <div className="font-semibold">{q.question}</div>
-                <div className="grid grid-cols-2 gap-4">
-                  {q.options.map((option, idx) => (
-                    <label key={idx} className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name={`question-${q.id}`}
-                        value={option}
-                        checked={answers[q.id] === option}
-                        onChange={() => handleOptionChange(q.id, option)}
-                        className="accent-blue-500"
-                      />
-                      <span>{option}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={handleSubmit}
-            className="mt-6 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md"
+      <h1 className="text-2xl font-bold mb-6 text-center">Interview Simulation</h1>
+      
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <p>{error}</p>
+          <button 
+            className="text-red-700 underline ml-2"
+            onClick={() => setError(null)}
           >
-            Submit Test
+            Dismiss
           </button>
+        </div>
+      )}
+
+      {!isCompleted ? (
+        <>
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <h2 className="text-lg font-semibold mb-2">Question:</h2>
+            <p className="text-gray-800">{question}</p>
+          </div>
+
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold mb-2">Your Answer:</h2>
+            <textarea
+              value={currentAnswer}
+              onChange={handleAnswerChange}
+              placeholder="Type your answer here..."
+              rows="6"
+              className="p-3 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              onClick={handleSubmitAnswer}
+              disabled={isLoading}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md disabled:bg-blue-300"
+            >
+              {isLoading ? "Submitting..." : "Next"}
+            </button>
+          </div>
         </>
       ) : (
         <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-4">Your Score: {score} / {questionsSet.length}</h2>
+          <h2 className="text-2xl font-semibold mb-6">Interview Completed</h2>
+          
+          {assessmentResult ? (
+            <div className="text-left">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold">Score: {assessmentResult.score}/100</h3>
+                <p className="mt-2">{assessmentResult.summary}</p>
+              </div>
+              
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-green-600">Strengths:</h3>
+                <ul className="list-disc pl-5 mt-1">
+                  {assessmentResult.strengths.map((strength, index) => (
+                    <li key={index} className="mt-1">{strength}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-red-600">Areas for Improvement:</h3>
+                <ul className="list-disc pl-5 mt-1">
+                  {assessmentResult.weaknesses.map((weakness, index) => (
+                    <li key={index} className="mt-1">{weakness}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-blue-600">Suggestions:</h3>
+                <ul className="list-disc pl-5 mt-1">
+                  {assessmentResult.suggestions.map((suggestion, index) => (
+                    <li key={index} className="mt-1">{suggestion}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h3 className="font-semibold">Communication Skills</h3>
+                  <p className="text-sm mt-1">{assessmentResult.communication_skills}</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h3 className="font-semibold">Technical Knowledge</h3>
+                  <p className="text-sm mt-1">{assessmentResult.technical_knowledge}</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h3 className="font-semibold">Soft Skills</h3>
+                  <p className="text-sm mt-1">{assessmentResult.soft_skills}</p>
+                </div>
+              </div>
+              
+              {assessmentResult.red_flags && assessmentResult.red_flags.length > 0 && (
+                <div className="mb-4 p-4 bg-red-50 rounded-lg">
+                  <h3 className="text-lg font-semibold text-red-700">Red Flags:</h3>
+                  <ul className="list-disc pl-5 mt-1">
+                    {assessmentResult.red_flags.map((flag, index) => (
+                      <li key={index} className="mt-1 text-red-700">{flag}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p>Calculating your interview score...</p>
+          )}
+          
           <button
-            onClick={() => window.location.reload()}
-            className="mt-4 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-md"
+            onClick={onBack}
+            className="mt-6 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md"
           >
-            Retake Test
+            Back to Dashboard
           </button>
         </div>
       )}

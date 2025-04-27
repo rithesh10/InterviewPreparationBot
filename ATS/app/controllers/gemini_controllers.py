@@ -59,9 +59,11 @@ def start_interview():
         return jsonify({"error": f"Missing field in request: {str(e)}"}), 400
 
     except PyMongoError as e:
+        print("database error",str(e))
         return jsonify({"error": "Database error", "details": str(e)}), 500
 
     except Exception as e:
+        print("",str(e))
         return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
 
 def answer_question():
@@ -137,9 +139,11 @@ def answer_question():
         return jsonify({"error": f"Missing field in request: {str(e)}"}), 400
     
     except PyMongoError as e:
+        print("database error",str(e))
         return jsonify({"error": "Database error", "details": str(e)}), 500
     
     except Exception as e:
+        print("An unexpected error occurred",str(e))
         return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
 def summary_of_text():
     """Summarizes the resume and job description to extract key points."""

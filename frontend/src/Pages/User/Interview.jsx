@@ -1,69 +1,98 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import config from "../../config/config"; // Assuming this contains your backend URL
+import config from "../../config/config"; // Assuming backend URL config
+import Test from "./Test"; // Assuming you have an InterviewTest component for starting the interview
 
 const Interview = ({ userId }) => {
-  const [resume, setResume] = useState(null);
+  const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedInterview, setSelectedInterview] = useState(null); // <--- new state
 
-  // Handle the case where userId is not available
-  useEffect(() => { 
+  useEffect(() => {
     if (!userId) {
       setError("No user ID provided.");
     } else {
-      fetchResume(); // Fetch the resume when userId is available
+      fetchResumes();
     }
-  }, [userId]); // Runs whenever userId changes
+  }, [userId]);
 
-  const fetchResume = async () => {
+  const fetchResumes = async () => {
     if (!userId) {
       setError("No user ID available.");
       return;
     }
 
     setLoading(true);
-    setError(""); // Clear previous error
-    setResume(null); // Clear previous resume data
+    setError("");
+    setResumes([]);
 
     try {
-      const response = await axios.get(
-        `${config.backendUrl}/get-resume-by-userId/${userId}`);
-      console.log("data1"+response.data);
-      // Handle successful response
-      if (response.data) {
-        if (response.data.resume) {
-          setResume(response.data.resume); // Assuming the response contains 'resume' object
-        } else {
-          setError("No resume found for the given user ID.");
-        }
+      const response = await axios.get(`${config.backendUrl}/resume/get-resume-by-userId/${userId}`, {
+        withCredentials: true,
+      });
+
+      if (response.data && response.data.resumes && response.data.resumes.length > 0) {
+        const resumesWithJob = await Promise.all(
+          response.data.resumes.map(async (resume) => {
+            if (resume.job_id) {
+              try {
+                const jobResponse = await axios.get(`${config.backendUrl}/jobs/job/${resume.job_id}`, {
+                  withCredentials: true,
+                });
+                return {
+                  ...resume,
+                  job: jobResponse.data.job || null,
+                };
+              } catch (jobErr) {
+                console.error("Error fetching job:", jobErr);
+                return { ...resume, job: null };
+              }
+            } else {
+              return { ...resume, job: null };
+            }
+          })
+        );
+        setResumes(resumesWithJob);
       } else {
-        setError("No data returned from the server.");
+        setError("No resumes found for the given user ID.");
       }
     } catch (err) {
-      setError("Error fetching resume: " + err.message);
+      setError("Error fetching resumes: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const startInterview = (resumeText, jobDescription) => {
+    setSelectedInterview({ resumeText, jobDescription }); // <--- set the selected interview
+  };
+
+  if (selectedInterview) {
+    return (
+      <Test
+        resumeText={selectedInterview.resumeText}
+        jobDescription={selectedInterview.jobDescription}
+        onBack={() => setSelectedInterview(null)} // <--- back button sets it to null
+      />
+    );
+  }
+
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6 text-center">Fetch Resume by User ID</h1>
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6 text-center">Fetch Resumes by User ID</h1>
 
       <div className="space-y-6">
-        {/* Button to Fetch Resume */}
         <button
-          onClick={fetchResume}
+          onClick={fetchResumes}
           disabled={loading}
           className={`w-full text-white px-6 py-3 rounded-md ${
             loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
           }`}
         >
-          {loading ? "Fetching..." : "Fetch Resume"}
+          {loading ? "Fetching..." : "Fetch Resumes"}
         </button>
 
-        {/* Display Error Message */}
         {error && (
           <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
             <p className="font-medium">Error:</p>
@@ -71,11 +100,36 @@ const Interview = ({ userId }) => {
           </div>
         )}
 
-        {/* Display Resume Data */}
-        {resume && (
-          <div className="mt-6 p-4 bg-gray-50 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">Resume Details:</h2>
-            <pre className="text-gray-700 whitespace-pre-wrap">{JSON.stringify(resume, null, 2)}</pre>
+        {resumes.length > 0 && (
+          <div className="mt-6 grid grid-cols-1 gap-6">
+            {resumes.map((resume) => (
+              <div key={resume._id} className="p-6 bg-gray-50 border rounded-lg shadow-md">
+                {resume.job && (
+                  <>
+                    <p className="mb-2">
+                      <span className="text-xl font-semibold">{resume.job.title}</span>
+                    </p>
+                    <p className="mb-2">
+                      <span className="font-medium">Company:</span> {resume.job.company}
+                    </p>
+                    <p className="mb-2">
+                      <span className="font-medium">Location:</span> {resume.job.location}
+                    </p>
+                  </>
+                )}
+
+                <p className="mb-2">
+                  <span className="font-medium">Experience:</span> {resume.experience} years
+                </p>
+
+                <button
+                  onClick={() => startInterview(resume.resume_text, resume.job?.description || "")}
+                  className="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                >
+                  Start Interview
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>
