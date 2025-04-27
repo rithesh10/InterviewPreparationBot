@@ -31,7 +31,7 @@ const JobList = ({ jobs, fetchResumes, setSelectedJob, fetchJobs }) => {
               key={job._id}
               className="bg-blue-50 rounded-lg p-5 flex justify-between items-center transition-transform transform hover:scale-105 hover:shadow-md"
             >
-              <Link to={`/job/${job._id}`} className="flex-1">
+              <Link to={`/admin/job/${job._id}`} className="flex-1">
                 <h4 className="font-semibold text-xl text-blue-800">{job.title}</h4>
                 <p className="text-gray-700">{job.company}</p>
               </Link>

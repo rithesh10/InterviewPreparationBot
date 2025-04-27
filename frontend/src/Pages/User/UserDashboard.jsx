@@ -1,90 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { 
-  User, 
-  Bell, 
-  Briefcase, 
-  FileText, 
-  Search, 
-  CheckCircle, 
-  XCircle, 
-  Clock 
+import { Link } from 'react-router-dom';
+import {
+  User,
+  Bell,
+  Briefcase,
+  FileText,
+  Search,
+  CheckCircle,
+  XCircle,
+  Clock,
+  ArrowRight,
+  Upload,
+  TrendingUp,
+  Award,
+  PieChart,
+  Compass,
+  Target,
+  // Link
 } from 'lucide-react';
-
-// Mock data - in a real application, these would come from API calls
+// Mock data
 const mockJobApplications = [
-  {
-    id: 1,
-    company: 'TechCorp Solutions',
-    position: 'Senior Software Engineer',
-    status: 'Applied',
-    dateApplied: '2024-03-20',
-    applicationProgress: [
-      { stage: 'Application Submitted', completed: true, date: '2024-03-20' },
-      { stage: 'Resume Review', completed: false, date: null },
-      { stage: 'Initial Interview', completed: false, date: null },
-      { stage: 'Technical Interview', completed: false, date: null },
-      { stage: 'Final Interview', completed: false, date: null }
-    ]
-  },
-  {
-    id: 2,
-    company: 'InnovateX',
-    position: 'Product Manager',
-    status: 'Interview',
-    dateApplied: '2024-03-15',
-    applicationProgress: [
-      { stage: 'Application Submitted', completed: true, date: '2024-03-15' },
-      { stage: 'Resume Review', completed: true, date: '2024-03-18' },
-      { stage: 'Initial Interview', completed: true, date: '2024-03-22' },
-      { stage: 'Technical Interview', completed: false, date: null },
-      { stage: 'Final Interview', completed: false, date: null }
-    ]
-  }
+  // Your mock data here
 ];
-
 const mockNotifications = [
-  {
-    id: 1,
-    type: 'application_update',
-    message: 'Your application for Senior Software Engineer at TechCorp Solutions is under review',
-    date: '2024-03-25',
-    read: false
-  },
-  {
-    id: 2,
-    type: 'interview_invite',
-    message: 'You have been invited for an initial interview at InnovateX',
-    date: '2024-03-22',
-    read: false
-  }
+  // Your mock data here
 ];
-
 const mockRecommendedJobs = [
-  {
-    id: 1,
-    title: 'Full Stack Developer',
-    company: 'StartUp Innovations',
-    location: 'Remote',
-    salary: '$120,000 - $150,000'
-  },
-  {
-    id: 2,
-    title: 'DevOps Engineer',
-    company: 'CloudTech Systems',
-    location: 'San Francisco, CA',
-    salary: '$130,000 - $160,000'
-  }
+  // Your mock data here
 ];
 
 const UserDashboard = () => {
-  const {user} = useAuth()
+  const { user } = useAuth();
   const [jobApplications, setJobApplications] = useState(mockJobApplications);
   const [notifications, setNotifications] = useState(mockNotifications);
   const [recommendedJobs, setRecommendedJobs] = useState(mockRecommendedJobs);
 
+  const [resumeName, setResumeName] = useState('');
+  const [activeSection, setActiveSection] = useState('home');
+
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch (status) {
       case 'Applied': return <Clock className="text-yellow-500" />;
       case 'Interview': return <CheckCircle className="text-green-500" />;
       case 'Rejected': return <XCircle className="text-red-500" />;
@@ -93,125 +49,296 @@ const UserDashboard = () => {
   };
 
   const markNotificationAsRead = (id) => {
-    setNotifications(notifications.map(notif => 
+    setNotifications(notifications.map(notif =>
       notif.id === id ? { ...notif, read: true } : notif
     ));
   };
 
+  const handleFileChange = (e) => {
+    if (e.target.files.length > 0) {
+      setResumeName(e.target.files[0].name);
+    }
+  };
+
   return (
-    <div className="container mx-auto p-6 bg-gray-50">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Profile Section */}
-        <div className="bg-white shadow-lg rounded-xl p-6">
-          <div className="flex items-center mb-4">
-            <User className="w-16 h-16 text-blue-500 mr-4" />
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">{user.full_name}</h2>
-              <p className="text-gray-500">{user.email}</p>
-            </div>
-          </div>
-          
-          <div className="mb-4">
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Profile Completeness</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div 
-                className="bg-blue-600 h-2.5 rounded-full" 
-                style={{width: `${user.profileCompleteness}%`}}
-              ></div>
-            </div>
-          </div>
-          
-          <button className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-all duration-300">
-            Complete Profile
-          </button>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
 
-        {/* Job Applications */}
-        <div className="bg-white shadow-lg rounded-xl p-6">
-          <div className="flex items-center mb-4">
-            <Briefcase className="w-6 h-6 mr-2 text-blue-500" />
-            <h3 className="text-xl font-semibold text-gray-800">My Applications</h3>
-          </div>
-          
-          {jobApplications.map(application => (
-            <div key={application.id} className="mb-4 pb-4 border-b">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h4 className="font-medium text-gray-800">{application.position}</h4>
-                  <p className="text-gray-500">{application.company}</p>
-                </div>
-                <div className="flex items-center">
-                  {getStatusIcon(application.status)}
-                  <span className="ml-2 text-gray-600">{application.status}</span>
-                </div>
-              </div>
-              <div className="mt-2 flex space-x-1">
-                {application.applicationProgress.map((stage, index) => (
-                  <div 
-                    key={index} 
-                    className={`h-1 ${stage.completed ? 'bg-green-500' : 'bg-gray-300'} inline-block w-16`}
-                  ></div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Notifications & Recommended Jobs */}
-        <div>
-          {/* Notifications */}
-          <div className="bg-white shadow-lg rounded-xl p-6 mb-6">
-            <div className="flex items-center mb-4">
-              <Bell className="w-6 h-6 mr-2 text-blue-500" />
-              <h3 className="text-xl font-semibold text-gray-800">Notifications</h3>
-            </div>
-            
-            {notifications.map(notification => (
-              <div 
-                key={notification.id} 
-                className={`p-4 mb-2 rounded-lg ${!notification.read ? 'bg-blue-50' : 'bg-gray-100'} flex justify-between items-center`}
-              >
-                <div>
-                  <p className="text-sm">{notification.message}</p>
-                  <p className="text-xs text-gray-500">{notification.date}</p>
-                </div>
-                {!notification.read && (
-                  <button 
-                    onClick={() => markNotificationAsRead(notification.id)}
-                    className="text-blue-500 text-sm"
-                  >
-                    Mark as Read
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Recommended Jobs */}
-          <div className="bg-white shadow-lg rounded-xl p-6">
-            <div className="flex items-center mb-4">
-              <Search className="w-6 h-6 mr-2 text-blue-500" />
-              <h3 className="text-xl font-semibold text-gray-800">Recommended Jobs</h3>
-            </div>
-            
-            {recommendedJobs.map(job => (
-              <div key={job.id} className="mb-4 pb-4 border-b">
-                <h4 className="font-medium text-gray-800">{job.title}</h4>
-                <p className="text-gray-500">{job.company}</p>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-sm text-green-600">{job.location}</span>
-                  <span className="text-sm font-bold text-gray-800">{job.salary}</span>
-                </div>
-                <button className="mt-2 w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition-all duration-300">
-                  Apply Now
+      {/* Hero Section */}
+      <div className="pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-8">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
+              <span className="block">Discover Your</span>
+              <span className="block text-indigo-600">Professional Potential</span>
+            </h1>
+            <p className="text-xl text-gray-600">
+              Our AI-powered assessment platform helps you understand where you stand in the job market and what steps to take next in your career journey.
+            </p>
+            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+              <Link to="/user/three-steps" className="flex items-center">  {/* Add Link and set the route */}
+                <button className="px-8 py-4 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center">
+                  Get Started <ArrowRight className="ml-2" size={18} />
                 </button>
+              </Link>
+              <button className="px-8 py-4 rounded-md border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center justify-center">
+                Learn More
+              </button>
+            </div>
+          </div>
+          <div className="hidden lg:block relative h-96">
+            <div className="absolute inset-0 bg-indigo-100 rounded-xl overflow-hidden">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-indigo-500 rounded-full opacity-20"></div>
+              <div className="absolute top-1/4 right-1/4 w-48 h-48 bg-blue-400 rounded-full opacity-20"></div>
+              <div className="absolute bottom-1/4 left-1/4 w-40 h-40 bg-purple-400 rounded-full opacity-20"></div>
+
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-xl w-64">
+                <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-4">
+                  <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" style={{ width: '75%' }}></div>
+                </div>
+                <div className="text-center text-gray-800 font-medium">Career Readiness: 75%</div>
               </div>
-            ))}
+
+              <div className="absolute top-1/4 right-1/3 bg-white p-4 rounded-lg shadow-lg">
+                <Award className="text-indigo-500" size={24} />
+                <span className="text-sm font-medium">Top 10% skills</span>
+              </div>
+
+              <div className="absolute bottom-1/4 left-1/3 bg-white p-4 rounded-lg shadow-lg">
+                <TrendingUp className="text-green-500" size={24} />
+                <span className="text-sm font-medium">Growing fast</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* "Know Yourself Better" Section */}
+      <div className="bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+              Get to Know Yourself Better
+            </h2>
+            <p className="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+              Our comprehensive assessment tools provide personalized insights to help you make informed career decisions.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+                <PieChart className="text-indigo-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Skill Analysis</h3>
+              <p className="text-gray-600">
+                Discover your strengths and areas for improvement with our detailed skill assessment reports.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                <Compass className="text-purple-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Career Path Mapping</h3>
+              <p className="text-gray-600">
+                Explore potential career paths based on your unique profile and market demands.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <Target className="text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Personalized Goals</h3>
+              <p className="text-gray-600">
+                Set achievable milestones and track your progress with customized development plans.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* How It Works Section */}
+      <div className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+              How It Works
+            </h2>
+            <p className="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+              Our simple four-step process helps you understand where you stand and how to improve.
+            </p>
+          </div>
+
+          <div className="relative">
+            {/* Timeline connector */}
+            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-indigo-200 transform -translate-y-1/2"></div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Step 1 */}
+              <div className="relative">
+                <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
+                  1
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm mt-8">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Upload Resume</h3>
+                  <p className="text-gray-600">Submit your resume for our AI to analyze your background and skills.</p>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="relative">
+                <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
+                  2
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm mt-8">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Complete Assessment</h3>
+                  <p className="text-gray-600">Take our targeted assessment designed to evaluate your job-specific skills.</p>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="relative">
+                <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
+                  3
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm mt-8">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Receive Report Card</h3>
+                  <p className="text-gray-600">Get comprehensive insights into your strengths and areas for growth.</p>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div className="relative">
+                <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
+                  4
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm mt-8">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Take Action</h3>
+                  <p className="text-gray-600">Follow our personalized recommendations to boost your career prospects.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Testimonials Section */}
+      <div className="py-16 bg-indigo-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+              What Our Users Say
+            </h2>
+            <p className="mt-4 text-xl text-indigo-100 max-w-2xl mx-auto">
+              Discover how our platform has helped students and professionals alike.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div className="ml-4">
+                  <h4 className="font-bold">Sarah Johnson</h4>
+                  <p className="text-sm text-gray-600">Computer Science Student</p>
+                </div>
+              </div>
+              <p className="text-gray-700">
+                "The assessment highlighted skills I didn't even know I had! It helped me focus my job search and land an internship at my dream tech company."
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div className="ml-4">
+                  <h4 className="font-bold">Michael Chen</h4>
+                  <p className="text-sm text-gray-600">Business Graduate</p>
+                </div>
+              </div>
+              <p className="text-gray-700">
+                "The career path mapping was eye-opening. I discovered alternatives I hadn't considered that better matched my strengths and interests."
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div className="ml-4">
+                  <h4 className="font-bold">Priya Patel</h4>
+                  <p className="text-sm text-gray-600">Engineering Professional</p>
+                </div>
+              </div>
+              <p className="text-gray-700">
+                "After 5 years in my field, I was feeling stuck. This platform helped me identify skill gaps and create a development plan that led to a promotion."
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl mb-6">
+            Ready to Discover Your Potential?
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            Join thousands of students and professionals who have transformed their careers with our assessment platform.
+          </p>
+          <div className="inline-flex rounded-md shadow">
+          <Link to="/user/three-steps" className="flex items-center">
+            <button className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+              Get Started For Free
+            </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-4">CareerCompass</h3>
+              <p className="text-gray-400">
+                Guiding your professional journey with data-driven insights.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-bold mb-4">Resources</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Guides</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Webinars</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold mb-4">Company</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold mb-4">Legal</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
+            <p>&copy; {new Date().getFullYear()} CareerCompass. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
