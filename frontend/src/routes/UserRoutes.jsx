@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';  // Import Routes and Route here
 import Navbar from '../Pages/User/Navbar';
@@ -33,3 +34,32 @@ const UserRoutes = () => {
 };
 
 export default UserRoutes;
+=======
+  import React from 'react'
+  import ProtectedRoutes from './ProtectedRoutes'
+  import { Route, Routes } from 'react-router-dom'
+  import UserDashboard from '../Pages/User/UserDashboard'
+  //import ResumeUpload from '../Pages/User/ResumeUpload'
+  import JobList from '../Pages/User/JobList'
+  import Navbar from '../Pages/User/Navbar'
+  import ThreeStepsComponent from '../Pages/User/ThreeStepsComponent'
+
+  const UserRoutes = () => {
+    return (
+      <>
+      <Navbar/>
+      
+      <Routes>
+        <Route element={<ProtectedRoutes role="user" />}>
+          <Route path="/" element={<UserDashboard />} />
+          <Route path="jobs" element={<JobList />} />
+          <Route path="/three-steps" element={<ThreeStepsComponent />} />
+        </Route>
+      </Routes>
+      </>
+    )
+  }
+
+  export default UserRoutes
+  //        <Route path="upload-resume" element={<ResumeUpload />} />
+>>>>>>> 8efeeafe0dd684b8836059b68370008aa2d49cd3

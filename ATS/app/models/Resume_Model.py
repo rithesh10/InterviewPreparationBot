@@ -13,6 +13,5 @@ class ResumeSchema(Schema):
     # Ensure experience is a non-negative integer
     experience = fields.Integer(required=True, validate=validate.Range(min=0))
     resume_text=fields.String()
-
     # Auto-set created_at timestamp
-    created_at = fields.DateTime(dump_only=True, missing=lambda: datetime.now())
+    created_at = fields.DateTime(dump_only=True)

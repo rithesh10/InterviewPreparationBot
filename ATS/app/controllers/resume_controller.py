@@ -16,6 +16,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {"pdf", "docx"}
 
+
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -82,6 +83,7 @@ def upload_resume():
         try:
             experience = int(experience)
         except ValueError:
+            # print()
             return jsonify({"error": "Experience must be a valid integer"}), 400
 
         # ✅ 6. Create the resume document
@@ -93,13 +95,14 @@ def upload_resume():
             "job_id":job_id,
             "experience": experience,
             "resume_text":extracted_text,
-            "created_at": datetime.now(timezone.utc)
+            # "created_at": datetime.now(timezone.utc)
         }
         # print(resume)
 
         # ✅ 7. Validate schema
         errors = resume_schema.validate(resume)
         if errors:
+            print(str(errors))
             return jsonify({"error": "Validation failed", "details": errors}), 400
         
         # ✅ 8. Insert into MongoDB
@@ -113,6 +116,7 @@ def upload_resume():
         }), 201
 
     except Exception as e:
+        print(str(e))
         return jsonify({"error": str(e)}), 500
 from flask import jsonify
 from bson import json_util, ObjectId
