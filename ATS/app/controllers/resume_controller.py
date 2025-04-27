@@ -92,8 +92,8 @@ def upload_resume():
             "skills": skills,
             "job_id":job_id,
             "experience": experience,
-            "resume_text":extracted_text
-            # "created_at": datetime.now(timezone.utc)
+            "resume_text":extracted_text,
+            "created_at": datetime.now(timezone.utc)
         }
         # print(resume)
 
@@ -135,7 +135,21 @@ def get_by_jobId(id):
 
 from flask import jsonify
 from bson import ObjectId, json_util
-
+def get_by_user_id(id):
+    try:
+        object_id=ObjectId(id)
+        resumes=mongo.db.resume.find({"user_id":id})
+        resume_list=list(resumes)
+        if not resume_list:
+             return jsonify({"message": "No resumes found"}), 404
+        for resume in resume_list:
+            resume["_id"]=str(resume["_id"])
+        return jsonify({
+            "message":"Fetched successfully",
+            "resumes":resume_list
+        }),200
+    except Exception as e:
+        return jsonify({"message":"Internal server error","details":str(e)}),500
 def get_by_Id(id):
     try:
         object_id = ObjectId(id)  # ✅ Convert id to ObjectId before querying
