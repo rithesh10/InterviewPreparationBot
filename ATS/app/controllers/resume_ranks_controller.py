@@ -5,19 +5,16 @@ from datetime import datetime,timezone
 from app import mongo  # Import MongoDB instance
 from app.models.Ranking_Model import resume_ranking_schema,resume_rankings_schema
 from app.ML.main import find_the_fields,find_the_score
-# def get_resume_ranking(request, id):
-#     try:
-#         object_id = ObjectId(id)
-#     except InvalidId:
-#         return JsonResponse({"error": "Invalid ID format"}, status=400)
+API_KEY="AIzaSyBXHxyQvTsXUoDB8pWiT0CF7ilGZoMzSE0"
 
-#     ranking = db.resume_rankings.find_one({"_id": object_id})
-#     if not ranking:
-#         return JsonResponse({"error": "Resume ranking not found"}, status=404)
 
-#     ranking["_id"] = str(ranking["_id"])
-#     serialized = resume_ranking_schema.dump(ranking)
-#     return JsonResponse(serialized, status=200)
+# # Your Gemini API Key
+import google.generativeai as genai
+genai.configure(api_key=API_KEY)
+
+
+# # Create the model instance
+model = genai.GenerativeModel("gemini-1.5-pro-latest")
 def add_resume_ranking():
     data = request.json
 
