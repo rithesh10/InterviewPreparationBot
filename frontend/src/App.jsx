@@ -6,6 +6,7 @@ import UserRoutes from './routes/UserRoutes'
 import AdminRoutes from './routes/AdminRoutes'
 import NotFound from './Pages/NotFound'
 import "./App.css"
+
 const App = () => {
   return (
     <>
@@ -15,10 +16,7 @@ const App = () => {
       <Route path="/user/*" element={<UserRoutes />} />
       <Route path="/admin/*" element={<AdminRoutes />} />
       <Route path="*" element={<NotFound/>} />
-    </Routes>
-
-    
-      
+    </Routes>      
     </>
   )
 }

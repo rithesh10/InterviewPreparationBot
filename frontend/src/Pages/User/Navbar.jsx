@@ -72,6 +72,12 @@ const Navbar = () => {
               Dashboard
             </Link>
             <Link
+              to="/user/interview"
+              className="text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition duration-300"
+            >
+              Take Interview
+            </Link>
+            <Link
               to="/user/jobs"
               className="text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition duration-300"
             >

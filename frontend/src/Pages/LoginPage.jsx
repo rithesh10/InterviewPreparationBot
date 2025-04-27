@@ -65,9 +65,9 @@ const LoginPage = () => {
   
         // Redirect based on role
         if (user?.role === "user") {
-          navigate("/user");
+          navigate("/user", { state: { userId: user._id } });
         } else if (user?.role === "admin") {
-          navigate("/admin");
+          navigate("/admin", { state: { userId: user._id } });
         } else {
           console.error("Unknown role:", user.role);
           setMessage("Unexpected role assigned.");
