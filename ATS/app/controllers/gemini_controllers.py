@@ -197,11 +197,15 @@ def calculate_score(id):
             return jsonify({"error": "Interview session not found"}), 404
         
         qa_data = interview_data.get("qa_history")
-
+        user_id = g.user["_id"]  # Assuming interview_sessions has a 'user_id' field
+        
         # Ensure qa_data exists
         if not qa_data:
             return jsonify({"error": "Q&A history is missing"}), 400
         
+        if not user_id:
+            return jsonify({"error": "User ID missing in interview session data"}), 400
+
         # Build the prompt for the AI model
         prompt = f"""
         You are an expert interview analysis agent. Your task is to evaluate the interview session based on the provided Q&A data below.
@@ -229,14 +233,13 @@ def calculate_score(id):
         # Call the model to generate content based on the prompt
         response = model.generate_content(prompt)
 
-        # Check if the response is empty or invalid
         if not response or not hasattr(response, 'text') or not response.text.strip():
             return jsonify({"error": "Received empty or invalid response from the model"}), 500
 
-        # Print the raw response for debugging (you can remove this in production)
+        # Print the raw response for debugging
         print("Raw response from model:", response.text)
 
-        # Use regex to remove the ```json and ``` backticks
+        # Use regex to remove ```json and ``` backticks
         response_text = re.sub(r'```json|```', '', response.text).strip()
 
         # Try parsing the JSON response
@@ -245,13 +248,18 @@ def calculate_score(id):
         except json.JSONDecodeError as e:
             return jsonify({"error": f"Failed to parse the model response as JSON: {str(e)}"}), 500
 
-        # Ensure the result is in the correct format
         if not isinstance(result, dict):
             return jsonify({"error": "Invalid response format from model"}), 500
         
+        # Add user_id and interview_session_id to the result
+        result['user_id'] = user_id
+        result['interview_session_id'] = str(object_id)  # Store the interview session id for reference
+
+        # Save the result into MongoDB
+        mongo.db.interview_scores.insert_one(result)
+
         # Successfully return the generated content
         return jsonify(result), 200
-    
+
     except Exception as e:
-        # Catch any other unexpected errors
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
