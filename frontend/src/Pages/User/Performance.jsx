@@ -11,11 +11,11 @@ const Performance = ({ userId }) => {
     const fetchPerformance = async () => {
       try {
         console.log(userId);
-        const response = await axios.post(`${config.backendUrl}/gemini/get-calculated-score/${userId}`, 
-          { id: userId },
+        // Change POST to GET
+        const response = await axios.get(`${config.backendUrl}/gemini/get-calculated-score/${userId}`, 
           { withCredentials: true });
-          console.log("kjwcnkj"+ response.data);
-          setPerformanceData(response.data.interview_score);
+        console.log("Response data:", response.data);
+        setPerformanceData(response.data.interview_score);
       } catch (err) {
         console.error('Error fetching performance:', err);
         setError('Failed to load performance data');
