@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Filter, Star, ArrowUp, Trash2 } from "lucide-react";
 import {useParams} from 'react-router-dom'
 import config from "../../config/config";
-import "./ResumeRankings.css";
+
 const ResumeRankings = () => {
     const {job_id} = useParams(); // Replace with actual job ID retrieval method
     const [rankings, setRankings] = useState([]);

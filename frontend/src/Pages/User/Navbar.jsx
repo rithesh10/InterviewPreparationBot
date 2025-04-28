@@ -50,7 +50,7 @@ const Navbar = () => {
               Take Interview
             </Link>
             <Link
-              to="/user/jobs"
+              to="/user/performance"
               className="text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-md text-sm font-medium transition duration-300"
             >
               Performance

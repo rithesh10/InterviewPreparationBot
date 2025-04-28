@@ -265,10 +265,9 @@ def calculate_score(id):
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 def get_calculated_score(id):
     try:
-        calculate_score=mongo.db.interview_scores.find_one({"_id":ObjectId(id)})
+        calculate_score=mongo.db.interview_scores.find({"user_id":id})
         if not calculate_score:
             return jsonify({"message":"Score not found"}), 404
         return jsonify({"interview_score":calculate_score}),200
     except Exception as e:
         return json_util({"error":"Interval server error","details":str(e)}),500
-    
