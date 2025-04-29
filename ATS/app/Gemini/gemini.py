@@ -16,3 +16,5 @@ def generate_prompt(prompt):
     except Exception as e:
         print("Error generating content:", str(e))
         return "Error: " + str(e)
+# Running async function
+

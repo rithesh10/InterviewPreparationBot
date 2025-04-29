@@ -7,7 +7,11 @@ import asyncio
 from bson import ObjectId,json_util
 import json
 from pymongo.errors import PyMongoError
+<<<<<<< HEAD
+API_KEY="AIzaSyC8Vywy2bR8VZ7mHzN_quY3OlmKeD7Z_eo"
+=======
 from groq import Groq
+>>>>>>> 6feb09c11f9ac4fb6dbb98e5451ea612134153b8
 
 # Initialize the Groq client
 client = Groq(api_key="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")
@@ -309,4 +313,8 @@ def get_calculated_score(id):
             return jsonify({"message":"Score not found"}), 404
         return jsonify({"interview_score":list(calculate_score)}),200
     except Exception as e:
+<<<<<<< HEAD
         return json_util({"error":"Interval server error","details":str(e)}),500
+=======
+        return json_util({"error":"Interval server error","details":str(e)}),500
+>>>>>>> 6feb09c11f9ac4fb6dbb98e5451ea612134153b8
