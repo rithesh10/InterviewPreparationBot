@@ -21,4 +21,6 @@ async def generate_prompt(prompt):
         print("Error generating content:", str(e))
         return "Error: " + str(e)
 # Running async function
+# Example of how to run async function
+asyncio.run(generate_prompt("Hello! Tell me a joke."))
 

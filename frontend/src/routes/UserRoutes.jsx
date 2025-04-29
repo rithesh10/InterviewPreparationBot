@@ -44,6 +44,9 @@ import ThreeStepsComponent from '../Pages/User/ThreeStepsComponent'
 
 import Interview from '../Pages/User/Interview';
 import { useAuth } from '../context/AuthContext'
+import LearningDashboard from '../Pages/User/LearningDashboard'
+import Languages from '../Pages/User/Languages'
+import TopicsList from '../Pages/User/Topics'
 const UserRoutes = () => {
   const {user}=useAuth()
   // console.log(user)
@@ -56,7 +59,10 @@ const UserRoutes = () => {
           <Route path="/" element={<UserDashboard />} />
           <Route path="jobs" element={<JobList />} />
           <Route path="/three-steps" element={<ThreeStepsComponent />} />
-         <Route path="interview" element={<Interview userId={user?._id} />} /> 
+          <Route path="/learning" element={<LearningDashboard />} />
+          <Route path="/languages" element={<Languages />} />
+          <Route path="/topics/:language" element={<TopicsList />} />
+         <Route path="/interview" element={<Interview userId={user?._id} />} /> 
         </Route>
       </Routes>
       </>

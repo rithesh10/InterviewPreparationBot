@@ -38,6 +38,18 @@ const Navbar = () => {
               Dashboard
             </Link>
             <Link
+              to="/user/learning"
+              className="text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-md text-sm font-medium transition duration-300"
+            >
+              Learning
+            </Link>
+            <Link
+              to="/user/compiler"
+              className="text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-md text-sm font-medium transition duration-300"
+            >
+              Compiler
+            </Link>
+            <Link
               to="/user/jobs"
               className="text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-md text-sm font-medium transition duration-300"
             >

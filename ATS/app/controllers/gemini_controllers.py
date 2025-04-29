@@ -7,7 +7,7 @@ import asyncio
 from bson import ObjectId,json_util
 import json
 from pymongo.errors import PyMongoError
-API_KEY="AIzaSyBXHxyQvTsXUoDB8pWiT0CF7ilGZoMzSE0"
+API_KEY="AIzaSyC8Vywy2bR8VZ7mHzN_quY3OlmKeD7Z_eo"
 
 
 # # Your Gemini API Key
@@ -108,7 +108,7 @@ def answer_question():
         interview_session['qa_history'].append({"q": next_question, "a": ""})
         
         # Check if interview should conclude
-        max_questions = 10
+        max_questions = 3
         if len(interview_session['qa_history']) >= max_questions:
             conclusion_message = "Thank you for your responses. The interview is now concluded."
             interview_session['qa_history'].append({"q": conclusion_message, "a": ""})
@@ -271,4 +271,3 @@ def get_calculated_score(id):
         return jsonify({"interview_score":calculate_score}),200
     except Exception as e:
         return json_util({"error":"Interval server error","details":str(e)}),500
-    
