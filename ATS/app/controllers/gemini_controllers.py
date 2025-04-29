@@ -7,16 +7,35 @@ import asyncio
 from bson import ObjectId,json_util
 import json
 from pymongo.errors import PyMongoError
+<<<<<<< HEAD
 API_KEY="AIzaSyC8Vywy2bR8VZ7mHzN_quY3OlmKeD7Z_eo"
+=======
+from groq import Groq
+>>>>>>> 6feb09c11f9ac4fb6dbb98e5451ea612134153b8
 
+# Initialize the Groq client
+client = Groq(api_key="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")
 
-# # Your Gemini API Key
-import google.generativeai as genai
-genai.configure(api_key=API_KEY)
+def generate_prompt(prompt):
+    try:
+        response = client.chat.completions.create(
+            model="LLaMA3-8B-8192",
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print("Error generating content:", str(e))
+        return "Error: " + str(e)
+# API_KEY="AIzaSyBXHxyQvTsXUoDB8pWiT0CF7ilGZoMzSE0"
+# # # Your Gemini API Key
+# import google.generativeai as genai
+# genai.configure(api_key=API_KEY)
 
 
 # # Create the model instance
-model = genai.GenerativeModel("gemini-1.5-pro-latest")
+# model = genai.GenerativeModel("gemini-1.5-pro-latest")
 
 def start_interview():
     """Start the interview process."""
@@ -34,7 +53,8 @@ def start_interview():
 
         Ask the first question.
         """
-        question = model.generate_content(prompt).text
+        # question = model.generate_content(prompt).text
+        question=generate_prompt(prompt)
         print(question)
         
         # Save interview session to MongoDB
@@ -102,7 +122,8 @@ def answer_question():
         """
         
         # Generate next question
-        next_question = model.generate_content(prompt).text
+        # next_question = model.generate_content(prompt).text
+        next_question=generate_prompt(prompt)
         
         # Append question
         interview_session['qa_history'].append({"q": next_question, "a": ""})
@@ -162,7 +183,8 @@ def summary_of_text():
         """
         
         # Generate resume summary
-        resume_summary = model.generate_content(resume_prompt).text
+        # resume_summary = model.generate_content(resume_prompt).text
+        resume_summary=generate_prompt(resume_prompt)
         
         # Create a prompt to summarize the job description
         job_desc_prompt = f"""
@@ -171,7 +193,7 @@ def summary_of_text():
         """
         
         # Generate job description summary
-        job_summary = model.generate_content(job_desc_prompt).text
+        job_summary = generate_prompt(job_desc_prompt)
         
         return jsonify({
             "resume_summary": resume_summary,
@@ -197,8 +219,8 @@ def calculate_score(id):
             return jsonify({"error": "Interview session not found"}), 404
         
         qa_data = interview_data.get("qa_history")
-        user_id = g.user["_id"]  # Assuming interview_sessions has a 'user_id' field
-        
+        user_id = g.user["_id"]  # Assuming 'g.user' is set
+
         # Ensure qa_data exists
         if not qa_data:
             return jsonify({"error": "Q&A history is missing"}), 400
@@ -231,18 +253,29 @@ def calculate_score(id):
         """
 
         # Call the model to generate content based on the prompt
-        response = model.generate_content(prompt)
-
-        if not response or not hasattr(response, 'text') or not response.text.strip():
-            return jsonify({"error": "Received empty or invalid response from the model"}), 500
+        # response = model.generate_content(prompt)
+        response = generate_prompt(prompt)
+        
+        # if not response or not hasattr(response, 'text') or not response.text.strip():
+        #     return jsonify({"error": "Received empty or invalid response from the model"}), 500
 
         # Print the raw response for debugging
-        print("Raw response from model:", response.text)
+        # print("Raw response from model:", response)
+        # print(response)
+        # Step 1: Clean and prepare response text
+        clean_text = re.sub(r'```json|```', '', response).strip()
+        print("Cleaned Text:", clean_text)  # Optional for debugging
+        # print(clean_text)
+        # Step 2: Start parsing from the first '{'
+        first_brace = clean_text.find('{')
+        last_brace = clean_text.rfind('}')
+        if first_brace == -1:
+            return jsonify({"error": "No opening { found in model response"}), 500
 
-        # Use regex to remove ```json and ``` backticks
-        response_text = re.sub(r'```json|```', '', response.text).strip()
+        response_text = clean_text[first_brace:last_brace + 1]
+        print(response_text)
 
-        # Try parsing the JSON response
+        # Step 3: Try parsing JSON
         try:
             result = json.loads(response_text)
         except json.JSONDecodeError as e:
@@ -253,7 +286,7 @@ def calculate_score(id):
         
         # Add user_id and interview_session_id to the result
         result['user_id'] = user_id
-        result['interview_session_id'] = str(object_id)  # Store the interview session id for reference
+        result['interview_session_id'] = str(object_id)
 
         # Save the result into MongoDB
         mongo.db.interview_scores.insert_one(result)
@@ -263,11 +296,17 @@ def calculate_score(id):
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
 def get_calculated_score(id):
     try:
-        calculate_score=mongo.db.interview_scores.find_one({"_id":ObjectId(id)})
+        calculate_score=mongo.db.interview_scores.find({"user_id":id})
         if not calculate_score:
             return jsonify({"message":"Score not found"}), 404
-        return jsonify({"interview_score":calculate_score}),200
+        return jsonify({"interview_score":list(calculate_score)}),200
     except Exception as e:
+<<<<<<< HEAD
         return json_util({"error":"Interval server error","details":str(e)}),500
+=======
+        return json_util({"error":"Interval server error","details":str(e)}),500
+>>>>>>> 6feb09c11f9ac4fb6dbb98e5451ea612134153b8

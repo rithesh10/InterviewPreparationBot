@@ -1,26 +1,20 @@
-# # from app.config import Config
-API_KEY="AIzaSyBXHxyQvTsXUoDB8pWiT0CF7ilGZoMzSE0"
+import groq
 
+# Your Groq API Key
+GROQ_API_KEY = "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"
 
-# # Your Gemini API Key
-import google.generativeai as genai
-genai.configure(api_key=API_KEY)
+# Configure Groq API
+groq.api_key = GROQ_API_KEY
 
+# Choose a model
+model = groq.Model("LLaMA3-8B-8192")
 
-# # Create the model instance
-model = genai.GenerativeModel("gemini-1.5-pro-latest")
-
-
-async def generate_prompt(prompt):
+def generate_prompt(prompt):
     try:
-        # Here's the key change - we need to await the generate_content call
-        response = await model.generate_content(prompt)
-        # The response object itself is not awaitable
-        return response.text
+        response = model.generate(prompt)
+        return response.choices[0].text
     except Exception as e:
         print("Error generating content:", str(e))
         return "Error: " + str(e)
 # Running async function
-# Example of how to run async function
-asyncio.run(generate_prompt("Hello! Tell me a joke."))
 
