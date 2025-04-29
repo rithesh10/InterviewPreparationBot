@@ -8,7 +8,7 @@ import Navbar from '../Pages/User/Navbar'
 import ThreeStepsComponent from '../Pages/User/ThreeStepsComponent'
 
 import Interview from '../Pages/User/Interview';
-import Performance from '../Pages/User/Performance';
+import PerformanceMain from '../Pages/User/PerformanceMain';
 import { useAuth } from '../context/AuthContext'
 const UserRoutes = () => {
   const {user}=useAuth()
@@ -23,7 +23,7 @@ const UserRoutes = () => {
           <Route path="jobs" element={<JobList />} />
           <Route path="/three-steps" element={<ThreeStepsComponent />} />
           <Route path="interview" element={<Interview userId={user?._id} />} /> 
-          <Route path="performance" element={<Performance userId={user?._id} />} /> 
+          <Route path="performance" element={<PerformanceMain userId={user?._id} />} /> 
         </Route>
       </Routes>
       </>
