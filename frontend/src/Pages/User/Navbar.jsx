@@ -41,18 +41,6 @@ const Navbar = () => {
                 Dashboard
               </Link>
               <Link
-                to="/user/courses"
-                className="text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-medium transition duration-200"
-              >
-                Courses
-              </Link>
-              <Link
-                to="/user/compiler"
-                className="text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-medium transition duration-200"
-              >
-                Compiler
-              </Link>
-              <Link
                 to="/user/jobs"
                 className="text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-medium transition duration-200"
               >
@@ -129,18 +117,6 @@ const Navbar = () => {
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
             >
               Dashboard
-            </Link>
-            <Link
-              to="/user/courses"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
-            >
-              Courses
-            </Link>
-            <Link
-              to="/user/compiler"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
-            >
-              Compiler
             </Link>
             <Link
               to="/user/jobs"
