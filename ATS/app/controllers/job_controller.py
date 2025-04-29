@@ -12,42 +12,47 @@ from email.mime.multipart import MIMEMultipart
 # Email Config (Gmail SMTP)
 SENDER_EMAIL = 'skillup.2x@gmail.com'
 SENDER_PASSWORD = 'xrlp qive amkt radm'  # Use App Password if 2FA enabled
-RECIPIENT_EMAIL = 'varshithkumar1001@gmail.com'
-
+RECIPIENT_EMAIL = 'gokulkashyapgannamaraju@gmail.com'
 def send_job_email(job_data):
     try:
         required_skills = job_data.get('required_skills', [])
         if isinstance(required_skills, str):
             required_skills = [required_skills] 
         
-        subject = f"🚀 New Job Alert: {job_data['title']} at {job_data['company']}"
+        subject = f"🌟🔥 {job_data['title']} @ {job_data['company']} - Your Dream Job Awaits! 🔥🌟"
         
         html_content = f"""
         <html>
-            <body style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-                    <h2 style="color: #2c3e50;">🎯 {job_data['title']}</h2>
-                    <h3 style="color: #3498db;">🏢 {job_data['company']}</h3>
-                    <hr style="border: 1px solid #eee;">
-                    
-                    <p><strong>📝 Description:</strong><br>{job_data['description']}</p>
-                    
-                    <p><strong>🔧 Skills Required:</strong><br>
-                     {', '.join(required_skills)}</p>
-                    
-                    <p><strong>📅 Posted:</strong> {job_data['posted_date'].strftime('%b %d, %Y')}</p>
-                    
-                    <div style="text-align: center; margin-top: 20px;">
-                        <a href="https://leetcode.com/problemset/" 
-                           style="background-color: #3498db; color: white; padding: 10px 20px; 
-                                  text-decoration: none; border-radius: 5px;">
-                            ✨ Apply Now
-                        </a>
+            <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; max-width: 650px; margin: 0 auto; color: #333;">
+                <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 25px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h1 style="color: #2c3e50; margin-bottom: 5px;">✨ {job_data['title']} ✨</h1>
+                        <h2 style="color: #3498db; margin-top: 0;">🏛️ {job_data['company']}</h2>
+                        <div style="background: #e74c3c; color: white; display: inline-block; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin: 10px 0;">🚨 HOT JOB ALERT 🚨</div>
                     </div>
                     
-                    <p style="font-size: 12px; color: #7f8c8d; margin-top: 30px;">
-                        Don't want these alerts? <a href="https://yourwebsite.com/unsubscribe">Unsubscribe</a>
-                    </p>
+                    <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="color: #2c3e50; border-bottom: 2px dashed #eee; padding-bottom: 10px;">📋 Job Snapshot</h3>
+                        
+                        <p><span style="font-weight: bold; color: #e74c3c;">📝 Description:</span><br>
+                        {job_data['description']}</p>
+                        
+                        <p><span style="font-weight: bold; color: #e74c3c;">🛠️ Tech Stack:</span><br>
+                        {', '.join(required_skills)}</p>
+                        
+                        <p><span style="font-weight: bold; color: #e74c3c;">📍 Location:</span> 🌍 {job_data.get('location', 'Remote')}</p>
+                        
+                        <p><span style="font-weight: bold; color: #e74c3c;">💰 Salary:</span> 💵 {job_data.get('salary', 'Competitive')}</p>
+                        
+                        <p><span style="font-weight: bold; color: #e74c3c;">📅 Posted:</span> 🗓️ {job_data['posted_date'].strftime('%b %d, %Y')}</p>
+                    </div>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; margin-top: 20px;">
+                        <p style="margin: 0;">⏳ <strong>Hurry!</strong> This position may fill up quickly!</p>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px; font-size: 10px; color: #95a5a6;">
+                        <p>🌟 You're receiving this because you're awesome! 🌟</p>
+                    </div>
                 </div>
             </body>
         </html>
@@ -55,7 +60,7 @@ def send_job_email(job_data):
 
         # ===== Send Email via Gmail SMTP =====
         message = MIMEMultipart('alternative')
-        message['From'] = f"SkillUp Jobs <{SENDER_EMAIL}>"
+        message['From'] = f"🚀 SkillUp Jobs <{SENDER_EMAIL}>"
         message['To'] = RECIPIENT_EMAIL
         message['Subject'] = subject
         message.attach(MIMEText(html_content, 'html'))
@@ -65,13 +70,12 @@ def send_job_email(job_data):
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.send_message(message)
         
-        print("✅ Email sent via Gmail SMTP!")
+        print("✅ Email sent successfully via Gmail SMTP!")
         return True
 
     except Exception as e:
-        print("❌ Email failed:", str(e))
+        print(f"❌ Failed to send email: {str(e)}")
         return False
-
 def createJob(data):
     try:
         errors = job_schema.validate(data)

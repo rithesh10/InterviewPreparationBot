@@ -9,6 +9,7 @@ const PerformanceMain = ({ userId }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log(userId)
     const fetchData = async () => {
       if (!userId) {
         setError('No user ID provided');

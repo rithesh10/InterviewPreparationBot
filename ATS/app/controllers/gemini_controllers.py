@@ -209,6 +209,7 @@ def calculate_score(id):
         # Fetch the interview session data from the database
         object_id = ObjectId(id)
         interview_data = mongo.db.interview_sessions.find_one({"_id": object_id})
+        print(interview_data)
         
         # Check if interview_data was found
         if not interview_data:
@@ -226,27 +227,34 @@ def calculate_score(id):
 
         # Build the prompt for the AI model
         prompt = f"""
-        You are an expert interview analysis agent. Your task is to evaluate the interview session based on the provided Q&A data below.
+You are a no-nonsense, highly critical interview analysis agent. Your job is to rigorously and objectively evaluate the candidate’s performance based solely on the Q&A transcript below.
 
-        Q&A History:
-        {qa_data}
+Q&A Transcript:
+{qa_data}
 
-        Please return your analysis strictly in the following JSON format:
+Your evaluation must be brutally honest and strictly follow this JSON format:
 
-        {{
-          "score": <integer, 0-100>,
-          "summary": "<brief summary of the candidate's overall performance>",
-          "strengths": ["<point 1>", "<point 2>", "..."],
-          "weaknesses": ["<point 1>", "<point 2>", "..."],
-          "suggestions": ["<actionable recommendation 1>", "..."],
-          "communication_skills": "<evaluation of clarity, confidence, and articulation>",
-          "technical_knowledge": "<evaluation of domain and technical understanding>",
-          "soft_skills": "<evaluation of professionalism, problem-solving, etc.>",
-          "red_flags": ["<if any major concerns>", "..."]
-        }}
+{{
+  "score": <integer, 0-100>,
+  "summary": "<brief, no-fluff summary of overall performance. Do not sugarcoat.>",
+  "strengths": ["<specific, concise points backed by evidence>", "..."],
+  "weaknesses": ["<clear, critical observations>", "..."],
+  "suggestions": ["<direct, actionable improvements with no soft language>", "..."],
+  "communication_skills": "<evaluate clarity, confidence, articulation — no sympathy for hesitations or vague answers>",
+  "technical_knowledge": "<evaluate depth, accuracy, and relevance of technical answers — highlight gaps directly>",
+  "soft_skills": "<evaluate professionalism, composure, problem-solving — mention if any immaturity or indecision is shown>",
+  "red_flags": ["<any signs of unpreparedness, dishonesty, poor attitude>", "..."]
+}}
 
-        Be objective, concise, and base your analysis only on the provided Q&A history.
-        """
+SCORING RULES:
+- Only award a score above 80 if the candidate shows exceptional performance with minimal flaws.
+- A score of 40-79 reflects mediocre to moderately competent performance with clear areas of concern.
+- A score below 30 indicates poor or unacceptable performance.
+- Do not be lenient. If in doubt, deduct points.
+
+Maintain a critical, unemotional tone. Never assume intent — judge only based on the content of the Q&A.
+"""
+
 
         # Call the model to generate content based on the prompt
         # response = model.generate_content(prompt)
