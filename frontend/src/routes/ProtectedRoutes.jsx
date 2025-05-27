@@ -1,6 +1,6 @@
 import React from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext' // Ensure useAuth is set up correctly
+import { useAuth } from '../context/AuthContext' 
 
 const ProtectedRoutes = ({ role }) => {
   const { user } = useAuth()
@@ -13,7 +13,7 @@ const ProtectedRoutes = ({ role }) => {
     return <Navigate to="/not-authorized" replace />
   }
 
-  return <Outlet /> // This renders nested routes
+  return <Outlet /> 
 }
 
 export default ProtectedRoutes

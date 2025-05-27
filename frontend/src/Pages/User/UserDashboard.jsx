@@ -17,18 +17,7 @@ import {
   PieChart,
   Compass,
   Target,
-  // Link
 } from 'lucide-react';
-// Mock data
-const mockJobApplications = [
-  // Your mock data here
-];
-const mockNotifications = [
-  // Your mock data here
-];
-const mockRecommendedJobs = [
-  // Your mock data here
-];
 
 const UserDashboard = () => {
   const { user } = useAuth();
@@ -62,9 +51,6 @@ const UserDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-
-
-      {/* Hero Section */}
       <div className="pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
@@ -76,7 +62,7 @@ const UserDashboard = () => {
               Our AI-powered assessment platform helps you understand where you stand in the job market and what steps to take next in your career journey.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <Link to="/user/three-steps" className="flex items-center">  {/* Add Link and set the route */}
+              <Link to="/user/three-steps" className="flex items-center">  
                 <button className="px-8 py-4 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center">
                   Get Started <ArrowRight className="ml-2" size={18} />
                 </button>
@@ -113,7 +99,6 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* "Know Yourself Better" Section */}
       <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -160,7 +145,6 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* How It Works Section */}
       <div className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -173,11 +157,9 @@ const UserDashboard = () => {
           </div>
 
           <div className="relative">
-            {/* Timeline connector */}
             <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-indigo-200 transform -translate-y-1/2"></div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-              {/* Step 1 */}
               <div className="relative">
                 <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
                   1
@@ -188,7 +170,6 @@ const UserDashboard = () => {
                 </div>
               </div>
 
-              {/* Step 2 */}
               <div className="relative">
                 <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
                   2
@@ -199,7 +180,6 @@ const UserDashboard = () => {
                 </div>
               </div>
 
-              {/* Step 3 */}
               <div className="relative">
                 <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
                   3
@@ -210,7 +190,6 @@ const UserDashboard = () => {
                 </div>
               </div>
 
-              {/* Step 4 */}
               <div className="relative">
                 <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
                   4
@@ -225,7 +204,6 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* Testimonials Section */}
       <div className="py-16 bg-indigo-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -280,7 +258,6 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* CTA Section */}
       <div className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl mb-6">
@@ -299,7 +276,6 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">

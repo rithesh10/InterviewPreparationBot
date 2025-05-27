@@ -5,7 +5,6 @@ const ThreeStepsComponent = () => {
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-md rounded-lg m-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-8">
-        {/* Left section with headline and steps */}
         <div className="space-y-8">
           <div className="space-y-4">
             <h2 className="text-3xl font-bold text-gray-800">
@@ -17,7 +16,6 @@ const ThreeStepsComponent = () => {
           </div>
           
           <div className="space-y-4">
-            {/* Step 1 */}
             <button className="w-full flex items-center p-4 bg-blue-50 hover:bg-blue-100 text-left rounded-lg border-l-4 border-blue-500 transition-colors">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
                 <Upload className="text-blue-600" size={24} />
@@ -28,7 +26,6 @@ const ThreeStepsComponent = () => {
               </div>
             </button>
             
-            {/* Step 2 */}
             <button className="w-full flex items-center p-4 bg-purple-50 hover:bg-purple-100 text-left rounded-lg border-l-4 border-purple-500 transition-colors">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
                 <Video className="text-purple-600" size={24} />
@@ -39,7 +36,6 @@ const ThreeStepsComponent = () => {
               </div>
             </button>
             
-            {/* Step 3 */}
             <button className="w-full flex items-center p-4 bg-green-50 hover:bg-green-100 text-left rounded-lg border-l-4 border-green-500 transition-colors">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
                 <FileText className="text-green-600" size={24} />
@@ -52,10 +48,8 @@ const ThreeStepsComponent = () => {
           </div>
         </div>
         
-        {/* Right section with image */}
         <div className="flex justify-center">
           <div className="relative w-full max-w-md">
-            {/* Using a placeholder image - in a real app you'd use an actual image */}
             <div className="rounded-lg overflow-hidden shadow-lg bg-gradient-to-br from-blue-100 to-purple-100 aspect-square flex items-center justify-center">
               <div className="text-center p-8">
                 <div className="w-24 h-24 mx-auto bg-white rounded-full shadow-inner flex items-center justify-center mb-4">
@@ -66,15 +60,11 @@ const ThreeStepsComponent = () => {
               </div>
             </div>
             
-            {/* Decorative elements */}
             <div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-300 rounded-full opacity-70"></div>
             <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-blue-400 rounded-full opacity-50"></div>
           </div>
         </div>
-      </div>
-      
-      {/* Copyright footer */}
-      
+      </div>      
     </div>
   );
 };

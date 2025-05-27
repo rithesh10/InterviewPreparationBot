@@ -5,7 +5,6 @@ import { CircleCheck } from 'lucide-react';
 function Languages() {
 	const navigate = useNavigate();
   
-	// Language data with badge counts
 	const languagesData = [
 	  { name: 'C', completed: 0, total: 19 },
 	  { name: 'C++', completed: 0, total: 16 },

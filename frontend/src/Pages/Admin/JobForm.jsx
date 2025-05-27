@@ -37,7 +37,6 @@ const JobForm = ({ fetchJobs, setError }) => {
 
   return (
     <>
-      {/* Post Job Button */}
       <div className="bg-white border border-green-600 rounded-xl shadow-2xl p-6 flex justify-center items-center h-[250px] w-full md:w-[400px] mt-6 mx-auto">
         <button
           onClick={() => setShowForm(true)}
@@ -47,12 +46,10 @@ const JobForm = ({ fetchJobs, setError }) => {
         </button>
       </div>
 
-      {/* Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center px-4">
           <div className="bg-white text-gray-900 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-green-700 relative font-sans">
 
-            {/* Close Button */}
             <button
               onClick={() => setShowForm(false)}
               className="absolute top-2 right-3 text-green-600 hover:text-green-800 text-3xl font-extrabold"
@@ -64,7 +61,6 @@ const JobForm = ({ fetchJobs, setError }) => {
               Post a New Job
             </h3>
 
-            {/* Input Fields */}
             {[
               { placeholder: "Job Title", field: "title" },
               { placeholder: "Company", field: "company" },

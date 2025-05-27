@@ -12,7 +12,6 @@ function ContentPage() {
 		<Header />
 		<main className="container mx-auto px-4 py-6">
 		  <div className="flex flex-col md:flex-row gap-6">
-			{/* Left Panel - Navigation Menu */}
 			<div className="bg-white rounded-lg shadow-md p-6 md:w-1/3">
 			  <div className="text-center mb-6">
 				<h2 className="text-xl font-bold text-gray-800 underline">{language}</h2>
@@ -48,7 +47,6 @@ function ContentPage() {
 			  </div>
 			</div>
 			
-			{/* Right Panel - Content */}
 			<div className="bg-white rounded-lg shadow-md p-6 md:w-2/3">
 			  <h2 className="text-2xl font-bold text-gray-800 mb-6">{topic}</h2>
 			  

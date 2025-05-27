@@ -9,10 +9,8 @@ const ResumeUpload = ({ job, onBack }) => {
   const [skills, setSkills] = useState([]);
   const [skillInput, setSkillInput] = useState("");
 
-  // Handle resume upload
   const handleResumeUpload = (event) => setResume(event.target.files[0]);
 
-  // Add skill to the list
   const handleAddSkill = () => {
     if (skillInput.trim() !== "") {
       setSkills([...skills, skillInput]);
@@ -20,7 +18,6 @@ const ResumeUpload = ({ job, onBack }) => {
     }
   };
 
-  // Handle form submission
   const handleJobApplication = async () => {
     try {
       const formData = new FormData();
@@ -28,7 +25,6 @@ const ResumeUpload = ({ job, onBack }) => {
       formData.append("experience", experience);
       formData.append("resume", resume);
 
-      // Append skills as an array
       skills.forEach((skill, index) => {
         formData.append(`skills[${index}]`, skill);
       });
@@ -40,7 +36,7 @@ const ResumeUpload = ({ job, onBack }) => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-          withCredentials: true, // Ensure cookies are sent
+          withCredentials: true,
         }
       );
       alert("Application submitted successfully");
@@ -55,7 +51,6 @@ const ResumeUpload = ({ job, onBack }) => {
       <div className="w-full sm:w-96 bg-white p-8 rounded-lg shadow-xl space-y-6">
         <h2 className="text-3xl font-semibold text-center text-blue-600">Apply for Job</h2>
 
-        {/* Experience Input */}
         <div>
           <label className="block text-lg font-medium text-gray-700">Experience (years)</label>
           <input
@@ -67,7 +62,6 @@ const ResumeUpload = ({ job, onBack }) => {
           />
         </div>
 
-        {/* Skills Input */}
         <div>
           <label className="block text-lg font-medium text-gray-700">Skills</label>
           <div className="flex items-center mt-2 space-x-2">
@@ -94,7 +88,6 @@ const ResumeUpload = ({ job, onBack }) => {
           </div>
         </div>
 
-        {/* Resume Upload */}
         <div>
           <label className="flex items-center bg-blue-600 text-white px-5 py-3 rounded-lg cursor-pointer hover:bg-blue-700 transition">
             <UploadCloud className="mr-3" />
@@ -103,7 +96,6 @@ const ResumeUpload = ({ job, onBack }) => {
           </label>
         </div>
 
-        {/* Submit Button */}
         {resume && (
           <button
             onClick={handleJobApplication}
@@ -113,7 +105,6 @@ const ResumeUpload = ({ job, onBack }) => {
           </button>
         )}
 
-        {/* Back Button */}
         <button
           onClick={onBack}
           className="mt-4 w-full bg-gray-400 text-white px-6 py-3 rounded-lg hover:bg-gray-500 transition"

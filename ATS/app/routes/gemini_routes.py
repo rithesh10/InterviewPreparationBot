@@ -4,13 +4,11 @@ from app.controllers.gemini_controllers import start_interview, answer_question,
 
 gemini_bp = Blueprint("gemini", __name__)
 
-# Route to start the interview session
 @gemini_bp.route("/start_interview_session", methods=["POST"])
 @verify_jwt
 def start_interview_session():
     return start_interview()
 
-# Route to answer the interview question
 @gemini_bp.route("/answer_interview_question", methods=["POST"])
 @verify_jwt
 def answer_interview_question():

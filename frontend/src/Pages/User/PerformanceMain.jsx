@@ -32,8 +32,7 @@ const PerformanceMain = ({ userId }) => {
     };
 
     fetchData();
-  }, [userId]); // Dependency array with userId to refetch if userId changes
-
+  }, [userId]); 
   if (loading) {
     return <div>Loading performance data...</div>;
   }

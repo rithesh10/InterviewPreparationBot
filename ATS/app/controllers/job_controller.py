@@ -9,9 +9,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-# Email Config (Gmail SMTP)
 SENDER_EMAIL = 'skillup.2x@gmail.com'
-SENDER_PASSWORD = 'xrlp qive amkt radm'  # Use App Password if 2FA enabled
+SENDER_PASSWORD = 'xrlp qive amkt radm' 
 RECIPIENT_EMAIL = 'gokulkashyapgannamaraju@gmail.com'
 def send_job_email(job_data):
     try:
@@ -58,7 +57,6 @@ def send_job_email(job_data):
         </html>
         """
 
-        # ===== Send Email via Gmail SMTP =====
         message = MIMEMultipart('alternative')
         message['From'] = f"🚀 SkillUp Jobs <{SENDER_EMAIL}>"
         message['To'] = RECIPIENT_EMAIL
@@ -85,7 +83,6 @@ def createJob(data):
         data["posted_date"] = datetime.now(timezone.utc)
         job_id = mongo.db.jobs.insert_one(data).inserted_id
 
-        # Send email (with retries if needed)
         email_sent = send_job_email(data)
         
         if not email_sent:

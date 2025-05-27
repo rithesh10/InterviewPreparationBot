@@ -4,7 +4,7 @@ import axios from "axios";
 import config from "../../config/config";
 
 const ResumeDetail = () => {
-  const { id } = useParams(); // Get resume ID from URL
+  const { id } = useParams();
   const [resume, setResume] = useState(null);
   const [error, setError] = useState(null);
 

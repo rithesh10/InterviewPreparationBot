@@ -1,7 +1,6 @@
 import React from 'react';
 import { TrendingUp, Book, Clock, AlertTriangle, Award, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
-// Card component with hover effect
 const Card = ({ title, icon, children, accentColor = "indigo" }) => {
   const colorClasses = {
     indigo: "text-indigo-600",
@@ -21,7 +20,6 @@ const Card = ({ title, icon, children, accentColor = "indigo" }) => {
   );
 };
 
-// Stat Card Component
 const StatCard = ({ title, value, subtitle, icon, trend, color = "indigo" }) => {
   const colorMap = {
     indigo: "text-indigo-500",
@@ -48,15 +46,12 @@ const StatCard = ({ title, value, subtitle, icon, trend, color = "indigo" }) => 
   );
 };
 
-// Line Chart component
 const LineChart = ({ data, labels, height = 300 }) => {
-  // Get max value for scaling
   const maxValue = Math.max(...data);
   const chartHeight = 200;
   const chartWidth = 400;
   const padding = 40;
   
-  // Calculate positions
   const points = data.map((value, index) => {
     const x = padding + (index * (chartWidth - 2 * padding)) / (data.length - 1);
     const y = chartHeight - padding - ((value / maxValue) * (chartHeight - 2 * padding));
@@ -70,7 +65,6 @@ const LineChart = ({ data, labels, height = 300 }) => {
   return (
     <div className="w-full h-full">
       <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full" style={{ height }}>
-        {/* Grid lines */}
         {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
           const y = chartHeight - padding - tick * (chartHeight - 2 * padding);
           return (
@@ -97,7 +91,6 @@ const LineChart = ({ data, labels, height = 300 }) => {
           );
         })}
 
-        {/* X-axis labels - rotated vertically */}
         {labels.map((label, i) => {
           const x = padding + (i * (chartWidth - 2 * padding)) / (labels.length - 1);
           return (
@@ -115,7 +108,6 @@ const LineChart = ({ data, labels, height = 300 }) => {
           );
         })}
         
-        {/* Line */}
         <path 
           d={pathData}
           fill="none"
@@ -125,7 +117,6 @@ const LineChart = ({ data, labels, height = 300 }) => {
           strokeLinejoin="round"
         />
         
-        {/* Data points */}
         {points.map((point, i) => (
           <g key={i}>
             <circle 
@@ -151,7 +142,6 @@ const PieChart = ({ data, labels, colors, height = 250 }) => {
   return (
     <div className="w-full h-full" style={{ height }}>
       <svg viewBox="0 0 100 100" className="w-full h-full">
-        {/* Slices */}
         {data.map((value, index) => {
           const percent = (value / total) * 100;
           const startX = 50 + 40 * Math.cos(2 * Math.PI * cumulativePercent / 100 - Math.PI / 2);
@@ -161,10 +151,9 @@ const PieChart = ({ data, labels, colors, height = 250 }) => {
           const endY = 50 + 40 * Math.sin(2 * Math.PI * cumulativePercent / 100 - Math.PI / 2);
           const largeArcFlag = percent > 50 ? 1 : 0;
 
-          // Calculate position for percentage text closer to the slice edge
           const midAngle = 2 * Math.PI * (cumulativePercent - percent / 2) / 100;
-          const textX = 50 + 47 * Math.cos(midAngle - Math.PI / 2); // Changed from 55 to 47
-          const textY = 50 + 47 * Math.sin(midAngle - Math.PI / 2); // Changed from 55 to 47
+          const textX = 50 + 47 * Math.cos(midAngle - Math.PI / 2); 
+          const textY = 50 + 47 * Math.sin(midAngle - Math.PI / 2); 
           const textAnchor = Math.cos(midAngle - Math.PI / 2) > 0 ? "start" : "end";
 
           return (
@@ -178,16 +167,16 @@ const PieChart = ({ data, labels, colors, height = 250 }) => {
               >
                 <title>{`${labels[index]}: ${value} (${Math.round(percent)}%)`}</title>
               </path>
-              {percent >= 3 && ( // Lowered threshold to 3% since text is closer
+              {percent >= 3 && ( 
                 <text
                   x={textX}
                   y={textY}
                   fill={colors[index]}
-                  fontSize="4" // Slightly smaller font since it's closer
+                  fontSize="4" 
                   textAnchor={textAnchor}
                   dominantBaseline="middle"
                   fontWeight="bold"
-                  className="drop-shadow-sm" // Adds subtle shadow for better visibility
+                  className="drop-shadow-sm"
                 >
                   {`${Math.round(percent)}%`}
                 </text>
@@ -204,7 +193,6 @@ const PieChart = ({ data, labels, colors, height = 250 }) => {
         </text>
       </svg>
       
-      {/* Legend */}
       <div className="flex flex-wrap justify-center gap-2 mt-4">
         {labels.map((label, index) => (
           <div key={index} className="flex items-center px-3 py-1 bg-gray-100 rounded-full">
@@ -222,7 +210,6 @@ const PieChart = ({ data, labels, colors, height = 250 }) => {
   );
 };
 
-// List item component with icons
 const ListItem = ({ children, type }) => {
   const iconMap = {
     strength: <CheckCircle size={16} className="text-green-500 flex-shrink-0" />,
@@ -238,37 +225,24 @@ const ListItem = ({ children, type }) => {
   );
 };
 
-// Main Dashboard Component
 const Performance = ({ interviewData }) => {
-  // Process the interview data
   const assessments = interviewData.interview_score || [];
   
-  // Get only the most recent 3 assessments
-  const recentAssessments = assessments.slice(-3).reverse(); // Take last 3 and reverse for chronological order
-  
-  // Get all scores in chronological order (for the chart)
+  const recentAssessments = assessments.slice(-3).reverse();
   const scoreHistory = assessments.map(assessment => assessment.score);
-  
-  // Get dates for the chart (using assessment dates or simple numbering if not available)
   const dates = assessments.map((_, index) => `Test ${index + 1}`);
-  
-  // Get current score (most recent)
   const currentScore = scoreHistory.length > 0 ? scoreHistory[scoreHistory.length - 1] : 0;
   
-  // Calculate score difference
   const scoreDifference = scoreHistory.length > 1 
     ? currentScore - scoreHistory[scoreHistory.length - 2] 
     : 0;
   
-  // Next goal is current score + 5
   const nextGoal = Math.min(currentScore + 5, 100);
   
-  // Count all strengths, weaknesses, and red flags (for the pie chart)
   let totalStrengths = 0;
   let totalWeaknesses = 0;
   let totalRedFlags = 0;
   
-  // For the lists, we'll only use recent assessments
   const recentStrengths = [];
   const recentWeaknesses = [];
   const recentRedFlags = [];
@@ -283,7 +257,6 @@ const Performance = ({ interviewData }) => {
     if (assessment.red_flags) recentRedFlags.push(...assessment.red_flags);
   });
 
-  // Data for pie chart (still uses all assessments)
   const pieData = {
     labels: ['Strengths', 'Weaknesses', 'Red Flags'],
     data: [totalStrengths, totalWeaknesses, totalRedFlags],
@@ -303,7 +276,6 @@ const Performance = ({ interviewData }) => {
           )}
         </header>
 
-        {/* Stats Row - remains unchanged */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <StatCard
             title="Current Score"
@@ -333,7 +305,6 @@ const Performance = ({ interviewData }) => {
           />
         </div>
 
-        {/* Charts Row - remains unchanged */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <Card title="Performance Trend" icon={<TrendingUp size={20} />}>
             <LineChart 
@@ -353,7 +324,6 @@ const Performance = ({ interviewData }) => {
           </Card>
         </div>
 
-        {/* Feedback Lists Row - now using recent data */}
         <div className="grid md:grid-cols-3 gap-6">
           <Card title="Recent Strengths" icon={<Award size={20} />} accentColor="green">
             <ul className="mt-3">

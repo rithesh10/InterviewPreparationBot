@@ -6,19 +6,18 @@ user_bp = Blueprint("users", __name__)
 @user_bp.errorhandler(ApiError)
 def handle_api_error(error):
     """Handle custom API errors and return JSON response."""
-    response = jsonify(error.to_dict())  # Convert the error object to a dictionary
-    response.status_code = error.status_code  # Set the status code from the error
+    response = jsonify(error.to_dict())  
+    response.status_code = error.status_code  
     return response
 
 @user_bp.route("/profile", methods=["GET"])
 def profile():
-    return "Hello"  # Calls function from user_controller.py
+    return "Hello"  
 
 @user_bp.route("/profile/update", methods=["POST"])
 def profile_update():
     data = request.get_json()
-    return update_profile(data)  # Calls function from user_controller.py
-
+    return update_profile(data)  
 @user_bp.route("/register",methods=["POST"])
 def register():
     data=request.get_json()

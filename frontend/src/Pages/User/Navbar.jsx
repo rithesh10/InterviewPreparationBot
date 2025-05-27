@@ -21,7 +21,6 @@ const Navbar = () => {
     <nav className="bg-white shadow-md w-full sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo - Left side */}
           <div className="flex-shrink-0">
             <Link
               to="/user"
@@ -31,7 +30,6 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Middle Navigation - Hidden on mobile */}
           <div className="hidden md:flex md:items-center md:justify-center md:flex-1 md:px-8">
             <div className="flex space-x-2">
               <Link
@@ -73,12 +71,11 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* User Info and Logout - Right side */}
           <div className="flex items-center space-x-4">
             {user && (
               <div className="hidden md:flex items-center space-x-2">
                 <span className="text-gray-700 text-sm font-medium">
-                  {user.email.split('@')[0]} {/* Show only username part */}
+                  {user.email.split('@')[0]} 
                 </span>
                 <UserCircle className="text-gray-700 w-5 h-5" />
               </div>
@@ -90,7 +87,6 @@ const Navbar = () => {
               Logout
             </button>
             
-            {/* Mobile menu button */}
             <button
               onClick={toggleMenu}
               className="md:hidden text-gray-700 hover:text-gray-900 focus:outline-none"
@@ -121,7 +117,6 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         <div className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
           <div className="px-2 pt-2 pb-4 space-y-1">
             <Link

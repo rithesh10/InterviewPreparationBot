@@ -5,7 +5,6 @@ import { CircleCheck } from 'lucide-react';
 function Dashboard() {
 	const navigate = useNavigate();
 	
-	// Skills data with badge counts
 	const skillsData = [
 	  { category: 'Languages', completed: 0, total: 12 },
 	  { category: 'Frontend', completed: 0, total: 6 },
@@ -14,7 +13,6 @@ function Dashboard() {
 	  { category: 'Aptitude', completed: 0, total: 34 }
 	];
   
-	// Progress categories for the progress section
 	const progressCategories = [
 	  'Languages',
 	  'Frontend',
@@ -27,7 +25,6 @@ function Dashboard() {
 	  if (category === 'Languages') {
 		navigate('/user/languages');
 	  }
-	  // Add other category navigations as needed
 	};
   
 	return (
@@ -36,7 +33,6 @@ function Dashboard() {
 		  <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Dashboard</h2>
 		  
 		  <div className="flex flex-col md:flex-row gap-6">
-			{/* Left Panel - Topics and Badges */}
 			<div className="bg-white rounded-lg shadow-md p-6 md:w-1/3">
 			  <div className="flex mb-4">
 				<div className="bg-gray-200 rounded-md py-2 px-4 w-1/2 text-center font-semibold text-gray-700">
@@ -64,7 +60,6 @@ function Dashboard() {
 			  </div>
 			</div>
 			
-			{/* Right Panel - Progress */}
 			<div className="bg-white rounded-lg shadow-md p-6 md:w-2/3">
 			  <div className="bg-gray-200 rounded-md py-2 px-4 mb-6 text-center font-semibold text-gray-700">
 				Progress

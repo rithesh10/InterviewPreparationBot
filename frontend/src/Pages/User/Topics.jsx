@@ -25,7 +25,6 @@ function TopicsList() {
 	  <div>
 		<main className="container mx-auto px-4 py-6">
 		  <div className="flex flex-col md:flex-row gap-6">
-			{/* Left Panel - Topics List */}
 			<div className="bg-white rounded-lg shadow-md p-6 md:w-2/5">
 			  <div className="bg-gray-200 rounded-md py-2 px-4 mb-4 text-center font-semibold text-gray-700">
 				Topics
@@ -44,7 +43,6 @@ function TopicsList() {
 			  </div>
 			</div>
 			
-			{/* Right Panel - Short Notes */}
 			<div className="bg-white rounded-lg shadow-md p-6 md:w-3/5">
 			  <div className="bg-gray-200 rounded-md py-2 px-4 mb-6 text-center font-semibold text-gray-700">
 				Short Notes

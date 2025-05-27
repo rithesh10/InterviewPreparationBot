@@ -49,21 +49,17 @@ optimized sql queries for faster data retrieval and analysis
 generated fraud heatmaps using seaborn for better visualization
 github.com/rithesh10/healthcare-fraud-detection."""]
 
-# Convert resume to embeddings
 import pickle
 import numpy as np
 
-# Load model and embeddings
 with open("SentenceTransformer.pkl", "rb") as f:
     model, category_columns, category_embeddings = pickle.load(f)
 
 print("Model loaded successfully!")
 resume_embedding = model.encode(resume_text)
 
-# Compute cosine similarity
 cosine_similarities = np.dot(category_embeddings, resume_embedding.T)
 
-# Get top matching categories
 predicted_categories = [category_columns[i] for i in np.argsort(cosine_similarities[:, 0])[-2:]]  
 
 print("Predicted Categories:", predicted_categories)

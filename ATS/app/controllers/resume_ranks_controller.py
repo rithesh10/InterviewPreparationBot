@@ -3,22 +3,19 @@ from bson import ObjectId
 from datetime import datetime,timezone
 import re
 
-from app import mongo  # Import MongoDB instance
+from app import mongo  
 from app.models.Ranking_Model import resume_ranking_schema,resume_rankings_schema
 from app.ML.main import find_the_fields,find_the_score
 API_KEY="AIzaSyBXHxyQvTsXUoDB8pWiT0CF7ilGZoMzSE0"
 
 
-# # Your Gemini API Key
 import google.generativeai as genai
 genai.configure(api_key=API_KEY)
 import json
 
-# # Create the model instance
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
 def add_resume_ranking_by_ResumeId(id):
     try:
-        # Fetch resume and job details
         resume = mongo.db.resume.find_one({"_id": ObjectId(id)})
         if not resume:
             return jsonify({"error": "Resume not found"}), 404
@@ -27,7 +24,6 @@ def add_resume_ranking_by_ResumeId(id):
         if not job:
             return jsonify({"error": "Job not found"}), 404
 
-        # Prepare prompt for Gemini
         prompt = f"""
         You are an expert recruiter.  
         I will give you:
@@ -56,7 +52,6 @@ def add_resume_ranking_by_ResumeId(id):
         {job['skills_required']}
         """
 
-        # Call Gemini model
         response = model.generate_content(prompt)
         response_text = re.sub(r'```json|```', '', response.text).strip()
         parsed_response = json.loads(response_text)
@@ -67,10 +62,8 @@ def add_resume_ranking_by_ResumeId(id):
         ai_score = parsed_response.get("score", 0)
         matching_skills = parsed_response.get("matching_skills", [])
 
-        # Identify missing skills
         missing_skills = [skill for skill in job["skills_required"] if skill not in matching_skills]
 
-        # Handle experience matching
         experience_mapping = {
             "Entry-Level": 0,
             "Mid-Level": 2,
@@ -80,7 +73,6 @@ def add_resume_ranking_by_ResumeId(id):
         if isinstance(job_experience_level, str):
             job_experience_level = experience_mapping.get(job_experience_level, 0)
 
-        # Construct the data to insert
         ranking_data = {
             "resume_id": str(resume["_id"]),
             "job_id": str(job["_id"]),
@@ -92,7 +84,6 @@ def add_resume_ranking_by_ResumeId(id):
             "experience_match": resume.get("experience", 0) >= job_experience_level,
         }
 
-        # Insert into DB
         resume_score_data = {}
         try:
             resume_score_data = mongo.db.resume_rankings.insert_one(ranking_data)
@@ -100,7 +91,6 @@ def add_resume_ranking_by_ResumeId(id):
             print("Database Insert Error:", str(db_error))
             return jsonify({"error": "Failed to save ranking to database"}), 500
 
-        # Option 1: Just return inserted_id
         return jsonify({"inserted_id": str(resume_score_data.inserted_id)}), 201
 
     except Exception as e:
@@ -119,13 +109,11 @@ from flask import jsonify
 
 def get_all_resume_rankings(id):
     try:
-        # Ensure job_id is treated correctly
         rankings = list(mongo.db.resume_rankings.find({"job_id": id}).sort("ai_score", -1))
 
         if not rankings:
             return jsonify({"message": "No resume rankings found for this job"}), 404
 
-        # Convert ObjectId fields to string for JSON serialization
         for ranking in rankings:
             ranking["_id"] = str(ranking["_id"])
             # print(ranking)
@@ -180,7 +168,6 @@ def get_resumes_by_matching_skills():
     return jsonify(resume_rankings_schema.dump(rankings)), 200
 def add_resume_ranking_for_job(job_id):
     """Process all resumes associated with a given job_id and rank them if not already ranked."""
-    # Fetch all resumes for the job
     resumes = list(mongo.db.resume.find({"job_id": job_id}))
     job = mongo.db.jobs.find_one({"_id": ObjectId(job_id)})
 
@@ -197,17 +184,16 @@ def add_resume_ranking_for_job(job_id):
     if isinstance(job_experience_level, str):
         job_experience_level = experience_mapping.get(job_experience_level, 0)
 
-    ranked_resumes = []  # List to store ranked resumes before insertion
+    ranked_resumes = []
 
     for resume in resumes:
-        # Check if this resume has already been ranked for this job
         existing_ranking = mongo.db.resume_rankings.find_one({
             "resume_id": str(resume["_id"]),
             "job_id": job_id
         })
 
         if existing_ranking:
-            continue  # Skip already ranked resume
+            continue 
 
         ai_score = find_the_score(resume["resume_text"], job["description"])
         matching_skills = find_the_fields(resume["resume_text"], job["skills_required"])
