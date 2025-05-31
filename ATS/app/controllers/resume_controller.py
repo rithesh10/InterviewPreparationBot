@@ -4,7 +4,7 @@ from flask import request, jsonify,g
 from werkzeug.utils import secure_filename
 from app.services.cloudinary_service import upload_to_cloudinary  
 import fitz
-from docx import Document 
+from docx import Document
 from app.models.Resume_Model import ResumeSchema
 from datetime import datetime,timezone
 from db.db import mongo

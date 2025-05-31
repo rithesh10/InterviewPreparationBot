@@ -19,6 +19,10 @@ import {
   Target,
 } from 'lucide-react';
 
+const mockJobApplications = [];
+const mockNotifications = [];
+const mockRecommendedJobs = [];
+
 const UserDashboard = () => {
   const { user } = useAuth();
   const [jobApplications, setJobApplications] = useState(mockJobApplications);

@@ -13,6 +13,7 @@ import { useAuth } from '../context/AuthContext'
 import LearningDashboard from '../Pages/User/LearningDashboard'
 import Languages from '../Pages/User/Languages'
 import TopicsList from '../Pages/User/Topics'
+import Resumematcher from '../Pages/User/Resumematcher'
 const UserRoutes = () => {
   const {user}=useAuth()
   // console.log(user)
@@ -26,9 +27,10 @@ const UserRoutes = () => {
           <Route path="jobs" element={<JobList />} />
           <Route path="/three-steps" element={<ThreeStepsComponent />} />
           <Route path="/learning" element={<LearningDashboard />} />
+          <Route path="/Resumematcher" element={<Resumematcher />} />
           <Route path="/languages" element={<Languages />} />
           <Route path="/topics/:language" element={<TopicsList />} />
-         <Route path="/interview" element={<Interview userId={user?._id} />} /> 
+          <Route path="/interview" element={<Interview userId={user?._id} />} /> 
           <Route path="interview" element={<Interview userId={user?._id} />} /> 
           <Route path="performance" element={<PerformanceMain userId={user?._id} />} /> 
           <Route path="performance" element={<Performance userId={user?._id} />} /> 
