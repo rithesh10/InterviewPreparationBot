@@ -10,7 +10,7 @@ from pymongo.errors import PyMongoError
 API_KEY="AIzaSyC8Vywy2bR8VZ7mHzN_quY3OlmKeD7Z_eo"
 from groq import Groq
 
-client = Groq(api_key="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")
+client = Groq(api_key="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")
 
 def generate_prompt(prompt):
     try:
