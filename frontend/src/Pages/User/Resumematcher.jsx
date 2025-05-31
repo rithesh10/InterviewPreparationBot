@@ -75,6 +75,7 @@ const ResumeMatcher = () => {
       console.log("Error fetching jobs:", err);
     }
     setLoading(false);
+    setResults({ score: 70, missingKeywords: ["Communication", "System design", "Team collaboration"] });
   };
 
   const resetForm = () => {
