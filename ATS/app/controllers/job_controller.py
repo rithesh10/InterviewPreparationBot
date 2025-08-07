@@ -4,7 +4,7 @@ from bson import ObjectId
 from datetime import datetime, timezone
 from app.models.job_model import job_schema, jobs_schema
 from app.middleware.auth_middleware import verify_jwt
-import google.generativeai as genai
+# import google.generativeai as genai
 import requests
 import json
 

@@ -6,14 +6,10 @@ import re
 from app import mongo  
 from app.models.Ranking_Model import resume_ranking_schema,resume_rankings_schema
 from app.ML.main import find_the_fields,find_the_score
-API_KEY="AIzaSyBXHxyQvTsXUoDB8pWiT0CF7ilGZoMzSE0"
 
 
-import google.generativeai as genai
-genai.configure(api_key=API_KEY)
 import json
 
-model = genai.GenerativeModel("gemini-1.5-pro-latest")
 def add_resume_ranking_by_ResumeId(id):
     try:
         resume = mongo.db.resume.find_one({"_id": ObjectId(id)})
