@@ -25,7 +25,7 @@ def start_interview():
         Ask the first question.
         """
         question =  generate_prompt(prompt=prompt)
-        print(question)
+        # print(question)
         
         interview_data = {
             "resume_summary": resume_summary,
@@ -170,7 +170,7 @@ def calculate_score(id):
     try:
         object_id = ObjectId(id)
         interview_data = mongo.db.interview_sessions.find_one({"_id": object_id})
-        print(interview_data)
+    
         
         if not interview_data:
             return jsonify({"error": "Interview session not found"}), 404
