@@ -13,7 +13,7 @@ const ResumeList = () => {
 
   useEffect(() => {
     fetchResumes();
-  }, [id]); // ✅ Fetch resumes when jobId changes
+  }, [id]);
 
   const fetchResumes = async () => {
   setIsLoading(true);
@@ -55,7 +55,6 @@ const ResumeList = () => {
 
   return (
     <div className="bg-white shadow-xl rounded-lg p-8 mt-8 max-w-4xl mx-auto">
-      {/* Buttons */}
       <div className="flex justify-center items-center space-x-6 py-4">
         <button
           onClick={calculateScores}
@@ -64,7 +63,6 @@ const ResumeList = () => {
           Calculate Scores
         </button>
 
-        {/* Pass jobId to ResumeRankings */}
         <Link to={`/admin/resume-rankings/${id}`}>
           <button className="rounded-md bg-blue-500 py-2 px-6 text-white font-semibold hover:bg-blue-600 transition-all duration-300">
             View Rankings
@@ -72,11 +70,9 @@ const ResumeList = () => {
         </Link>
       </div>
 
-      {/* Error Message */}
       {error && <ErrorAlert message={error} />}
       {message && <p className="text-gray-600 text-center">{message}</p>}
 
-      {/* Loading or Resume List */}
       {isLoading ? (
         <p className="text-center text-gray-500">Loading resumes...</p>
       ) : resumes.length === 0 ? (
@@ -88,7 +84,6 @@ const ResumeList = () => {
               key={resume._id}
               className="flex items-center justify-between border-b pb-4 hover:bg-gray-50 transition-all duration-300"
             >
-              {/* Link to individual resume details */}
               <Link to={`/admin/resumes/resume/${resume._id}`}>
                 <button className="text-blue-600 font-medium hover:underline">
                   <span className="font-semibold text-lg">Experience: {resume.experience} years</span>

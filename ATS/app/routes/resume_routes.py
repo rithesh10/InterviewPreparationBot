@@ -2,10 +2,8 @@ from flask import Blueprint
 from app.controllers.resume_controller import upload_resume, get_by_jobId,get_by_Id,get_by_user_id
 from app.middleware.auth_middleware import verify_jwt
 
-# Create a Blueprint for resumes
 resume_bp = Blueprint("resume", __name__)
 
-# Register the routes with middleware
 @resume_bp.route("/upload-resume", methods=["POST"])
 @verify_jwt
 def upload():

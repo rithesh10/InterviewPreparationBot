@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import config from "../../config/config"; // Assuming backend URL config
+import config from "../../config/config";
 import axios from "axios";
+import VoiceInput from "./VoiceInput";
 
 const Test = ({ resumeText, jobDescription, onBack, userId }) => {
   const [currentAnswer, setCurrentAnswer] = useState("");
@@ -12,7 +13,6 @@ const Test = ({ resumeText, jobDescription, onBack, userId }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Start the interview session when the component mounts
     startInterviewSession();
   }, []);
 
@@ -51,9 +51,13 @@ const Test = ({ resumeText, jobDescription, onBack, userId }) => {
   }
 };
 
-const handleAnswerChange = (e) => {
-  setCurrentAnswer(e.target.value);
-};
+  const handleAnswerChange = (e) => {
+    setCurrentAnswer(e.target.value);
+  };
+
+  const handleVoiceInput = (text) => {
+    setCurrentAnswer((prev) => (prev ? prev + " " + text : text));
+  };
 
 const handleSubmitAnswer = async () => {
   if (!currentAnswer.trim()) {
@@ -133,12 +137,14 @@ const fetchInterviewScore = async () => {
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-2xl font-bold mb-6 text-center">Interview Simulation</h1>
-      
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        Interview Simulation
+      </h1>
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           <p>{error}</p>
-          <button 
+          <button
             className="text-red-700 underline ml-2"
             onClick={() => setError(null)}
           >
@@ -155,14 +161,15 @@ const fetchInterviewScore = async () => {
           </div>
 
           <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Your Answer:</h2>
+             <h2 className="text-lg font-semibold mb-2">Your Answer:</h2>
+            {" "}
             <textarea
               value={currentAnswer}
-              onChange={handleAnswerChange}
-              placeholder="Type your answer here..."
+              readOnly
               rows="6"
-              className="p-3 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-3 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 bg-gray-100"
             />
+             <VoiceInput setCurrentAnswer={setCurrentAnswer} />
           </div>
 
           <div className="flex justify-end">
@@ -177,15 +184,15 @@ const fetchInterviewScore = async () => {
         </>
       ) : (
         <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-6">Interview Completed</h2>
-          
+            <h2 className="text-2xl font-semibold mb-6">Interview Completed</h2>
+
           {assessmentResult ? (
             <div className="text-left">
               <div className="mb-4">
                 <h3 className="text-xl font-semibold">Score: {assessmentResult.score}/100</h3>
                 <p className="mt-2">{assessmentResult.summary}</p>
               </div>
-              
+
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-green-600">Strengths:</h3>
                 <ul className="list-disc pl-5 mt-1">
@@ -194,7 +201,7 @@ const fetchInterviewScore = async () => {
                   ))}
                 </ul>
               </div>
-              
+
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-red-600">Areas for Improvement:</h3>
                 <ul className="list-disc pl-5 mt-1">
@@ -203,7 +210,7 @@ const fetchInterviewScore = async () => {
                   ))}
                 </ul>
               </div>
-              
+
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-blue-600">Suggestions:</h3>
                 <ul className="list-disc pl-5 mt-1">
@@ -212,7 +219,7 @@ const fetchInterviewScore = async () => {
                   ))}
                 </ul>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <h3 className="font-semibold">Communication Skills</h3>
@@ -227,7 +234,7 @@ const fetchInterviewScore = async () => {
                   <p className="text-sm mt-1">{assessmentResult.soft_skills}</p>
                 </div>
               </div>
-              
+
               {assessmentResult.red_flags && assessmentResult.red_flags.length > 0 && (
                 <div className="mb-4 p-4 bg-red-50 rounded-lg">
                   <h3 className="text-lg font-semibold text-red-700">Red Flags:</h3>
@@ -242,7 +249,7 @@ const fetchInterviewScore = async () => {
           ) : (
             <p>Calculating your interview score...</p>
           )}
-          
+
           <button
             onClick={onBack}
             className="mt-6 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md"

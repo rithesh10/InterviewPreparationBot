@@ -16,7 +16,6 @@ def start_interview():
         resume_summary = data['resume_summary']
         jd_summary = data['jd_summary']
         
-        # Generate the first question
         prompt = f"""
         You are an AI interviewer for this job.
 
@@ -28,7 +27,6 @@ def start_interview():
         question =  generate_prompt(prompt=prompt)
         print(question)
         
-        # Save interview session to MongoDB
         interview_data = {
             "resume_summary": resume_summary,
             "jd_summary": jd_summary,
@@ -37,10 +35,8 @@ def start_interview():
             "user_id": g.user["_id"],
         }
         
-        # Insert the interview data into MongoDB collection
         interview_session = mongo.db.interview_sessions.insert_one(interview_data)
         
-        # Return the first question to the client
         return jsonify({
             "question": question,
             "interview_id": str(interview_session.inserted_id)
@@ -69,16 +65,13 @@ def answer_question():
         
         object_id = ObjectId(interview_id)
         
-        # Fetch the interview session
         interview_session = mongo.db.interview_sessions.find_one({"_id": object_id})
         
         if not interview_session:
             return jsonify({"error": "Interview session not found"}), 404
         
-        # Append answer to last question
         interview_session['qa_history'][-1]["a"] = answer
         
-        # Build the conversation context
         qa_pairs = "\n".join([f"Q: {x['q']}\nA: {x['a']}" for x in interview_session['qa_history']])
         prompt = f"""
         You are an AI interviewer.
@@ -95,11 +88,9 @@ def answer_question():
         # Generate next question
         next_question =  generate_prompt(prompt=prompt)
         
-        # Append question
         interview_session['qa_history'].append({"q": next_question, "a": ""})
         
-        # Check if interview should conclude
-        max_questions = 10
+        max_questions = 3
         if len(interview_session['qa_history']) >= max_questions:
             conclusion_message = "Thank you for your responses. The interview is now concluded."
             interview_session['qa_history'].append({"q": conclusion_message, "a": ""})
@@ -115,7 +106,6 @@ def answer_question():
                 "interview_score": True
             })
         
-        # Update interview session
         mongo.db.interview_sessions.update_one(
             {"_id": object_id},
             {"$set": {"qa_history": interview_session['qa_history']}}
@@ -146,7 +136,6 @@ def summary_of_text():
         if not resume or not job_description:
             return jsonify({"error": "Both resume and job description are required"}), 400
         
-        # Create a prompt to summarize the resume
         resume_prompt = f"""
         You are a summarizer. Given the following resume, extract the key skills, experience, and technologies used. Provide a concise summary of the important points.
         Resume: {resume}
@@ -179,47 +168,51 @@ def summary_of_text():
         return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
 def calculate_score(id):
     try:
-        # Fetch the interview session data from the database
         object_id = ObjectId(id)
         interview_data = mongo.db.interview_sessions.find_one({"_id": object_id})
+        print(interview_data)
         
-        # Check if interview_data was found
         if not interview_data:
             return jsonify({"error": "Interview session not found"}), 404
         
         qa_data = interview_data.get("qa_history")
-        user_id = g.user["_id"]  # Assuming interview_sessions has a 'user_id' field
-        
-        # Ensure qa_data exists
+        user_id = g.user["_id"] 
+
         if not qa_data:
             return jsonify({"error": "Q&A history is missing"}), 400
         
         if not user_id:
             return jsonify({"error": "User ID missing in interview session data"}), 400
 
-        # Build the prompt for the AI model
         prompt = f"""
-        You are an expert interview analysis agent. Your task is to evaluate the interview session based on the provided Q&A data below.
+                    You are a no-nonsense, highly critical interview analysis agent. Your job is to rigorously and objectively evaluate the candidate’s performance based solely on the Q&A transcript below.
 
-        Q&A History:
-        {qa_data}
+                    Q&A Transcript:
+                    {qa_data}
 
-        Please return your analysis strictly in the following JSON format:
+                    Your evaluation must be brutally honest and strictly follow this JSON format:
 
-        {{
-          "score": <integer, 0-100>,
-          "summary": "<brief summary of the candidate's overall performance>",
-          "strengths": ["<point 1>", "<point 2>", "..."],
-          "weaknesses": ["<point 1>", "<point 2>", "..."],
-          "suggestions": ["<actionable recommendation 1>", "..."],
-          "communication_skills": "<evaluation of clarity, confidence, and articulation>",
-          "technical_knowledge": "<evaluation of domain and technical understanding>",
-          "soft_skills": "<evaluation of professionalism, problem-solving, etc.>",
-          "red_flags": ["<if any major concerns>", "..."]
-        }}
+                    {{
+                    "score": <integer, 0-100>,
+                    "summary": "<brief, no-fluff summary of overall performance. Do not sugarcoat.>",
+                    "strengths": ["<specific, concise points backed by evidence>", "..."],
+                    "weaknesses": ["<clear, critical observations>", "..."],
+                    "suggestions": ["<direct, actionable improvements with no soft language>", "..."],
+                    "communication_skills": "<evaluate clarity, confidence, articulation — no sympathy for hesitations or vague answers>",
+                    "technical_knowledge": "<evaluate depth, accuracy, and relevance of technical answers — highlight gaps directly>",
+                    "soft_skills": "<evaluate professionalism, composure, problem-solving — mention if any immaturity or indecision is shown>",
+                    "red_flags": ["<any signs of unpreparedness, dishonesty, poor attitude>", "..."]
+                    }}
 
-        Be objective, concise, and base your analysis only on the provided Q&A history.
-        """
+                    SCORING RULES:
+                    - Only award a score above 80 if the candidate shows exceptional performance with minimal flaws.
+                    - A score of 40-79 reflects mediocre to moderately competent performance with clear areas of concern.
+                    - A score below 30 indicates poor or unacceptable performance.
+                    - Do not be lenient. If in doubt, deduct points.
+
+                    Maintain a critical, unemotional tone. Never assume intent — judge only based on the content of the Q&A.
+                    """
+
 
         # Call the model to generate content based on the prompt
         response =  generate_prompt(prompt=prompt)
@@ -242,24 +235,22 @@ def calculate_score(id):
         if not isinstance(result, dict):
             return jsonify({"error": "Invalid response format from model"}), 500
         
-        # Add user_id and interview_session_id to the result
         result['user_id'] = user_id
-        result['interview_session_id'] = str(object_id)  # Store the interview session id for reference
+        result['interview_session_id'] = str(object_id)
 
-        # Save the result into MongoDB
         mongo.db.interview_scores.insert_one(result)
 
-        # Successfully return the generated content
         return jsonify(result), 200
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
 def get_calculated_score(id):
     try:
-        calculate_score=mongo.db.interview_scores.find_one({"_id":ObjectId(id)})
+        calculate_score=mongo.db.interview_scores.find({"user_id":id})
         if not calculate_score:
             return jsonify({"message":"Score not found"}), 404
-        return jsonify({"interview_score":calculate_score}),200
+        return jsonify({"interview_score":list(calculate_score)}),200
     except Exception as e:
         return json_util({"error":"Interval server error","details":str(e)}),500
-    

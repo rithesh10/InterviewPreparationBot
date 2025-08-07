@@ -5,7 +5,7 @@ import {useParams} from 'react-router-dom'
 import config from "../../config/config";
 // import "./ResumeRankings.css";
 const ResumeRankings = () => {
-    const {job_id} = useParams(); // Replace with actual job ID retrieval method
+    const {job_id} = useParams(); 
     const [rankings, setRankings] = useState([]);
     const [topResumes, setTopResumes] = useState([]);
     const [matchingResumes, setMatchingResumes] = useState([]);
@@ -15,7 +15,6 @@ const ResumeRankings = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("rankings");
 
-    // Fetch rankings for the job
     useEffect(() => {
         fetchRankings();
     }, [job_id]);
@@ -62,7 +61,7 @@ const ResumeRankings = () => {
     const deleteRanking = async (id) => {
         try {
             await axios.delete(`${config.backendUrl}/resume/resume-rankings/${id}`);
-            fetchRankings(); // Refresh rankings
+            fetchRankings(); 
         } catch (error) {
             console.error("Error deleting ranking:", error);
         }
@@ -100,10 +99,8 @@ const ResumeRankings = () => {
             <div className="bg-white shadow-md rounded-lg">
                 <div className="p-4 border-b flex items-center">
                     <Star className="mr-2 text-yellow-500" />
-                    {/* <h2 className="text-xl font-bold">Resume Rankings for Job ID: {job_id}</h2> */}
                 </div>
                 
-                {/* Tabs */}
                 <div className="flex border-b">
                     {['rankings', 'top-resumes', 'skill-match'].map(tab => (
                         <button
@@ -116,7 +113,6 @@ const ResumeRankings = () => {
                     ))}
                 </div>
 
-                {/* Rankings Tab */}
                 {activeTab === 'rankings' && (
                     <div className="p-4">
                         <div className="overflow-x-auto">
@@ -175,7 +171,6 @@ const ResumeRankings = () => {
                     </div>
                 )}
 
-                {/* Top Resumes Tab */}
                 {activeTab === 'top-resumes' && (
                     <div className="p-4">
                         <div className="flex mb-4 space-x-2">
@@ -216,7 +211,6 @@ const ResumeRankings = () => {
                     </div>
                 )}
 
-                {/* Skill Match Tab */}
                 {activeTab === 'skill-match' && (
                     <div className="p-4">
                         <div className="flex mb-4 space-x-2">
@@ -259,7 +253,6 @@ const ResumeRankings = () => {
                     </div>
                 )}
 
-                {/* Add New Ranking */}
                 <div className="p-4 border-t">
                     <h3 className="text-lg font-semibold mb-2">Add New Ranking</h3>
                     <div className="flex space-x-2">

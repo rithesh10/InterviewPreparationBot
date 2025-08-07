@@ -1,19 +1,16 @@
 from flask import Flask
 from .config import Config
-from db.db import init_mongo, mongo  # Import both
+from db.db import init_mongo, mongo
 from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)  # Load config settings
+    app.config.from_object(Config) 
 
-    # Allow CORS for a specific frontend URL (Replace with your actual frontend URL)
     CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
 
 
-    init_mongo(app)  # Initialize MongoDB with app
-
-    # Register Blueprints (modular routes)
+    init_mongo(app) 
     from app.routes.user_routes import user_bp
     from app.routes.resume_routes import resume_bp
     from app.routes.job_routes import job_bp

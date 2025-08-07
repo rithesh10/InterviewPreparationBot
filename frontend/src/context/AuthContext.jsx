@@ -4,7 +4,6 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    // Retrieve user from localStorage on initial load
     return JSON.parse(localStorage.getItem("user")) || null;
   });
 
@@ -14,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       localStorage.removeItem("user");
     }
-  }, [user]); // Sync state with localStorage whenever `user` changes
+  }, [user]);
 
   const login = (userData) => setUser(userData);
   

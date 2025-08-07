@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from db.db import mongo
 from bson import ObjectId
-from datetime import datetime,timezone
-from app.models.job_model import job_schema,jobs_schema
+from datetime import datetime, timezone
+from app.models.job_model import job_schema, jobs_schema
 from app.middleware.auth_middleware import verify_jwt
 import google.generativeai as genai
 import requests
@@ -25,7 +25,23 @@ def createJob(data):
         return jsonify({"message": "Job created successfully", "job_id": str(job.inserted_id)}), 201
 
     except Exception as e:
-        return jsonify({"error": "An error occurred", "details": str(e)}), 500
+        return jsonify({
+            "error": "An error occurred",
+            "details": str(e)
+        }), 500
+
+# def createJob(data):
+#     try:
+#         errors = job_schema.validate(data)
+#         if errors:
+#             return jsonify({"error": errors}), 400
+
+#         data["posted_date"] = datetime.now(timezone.utc)
+#         job_id = mongo.db.jobs.insert_one(data).inserted_id
+
+#         return jsonify({"message": "Job created successfully", "job_id": str(job_id)}), 201
+#     except Exception as e:
+#         return jsonify({"error": "An error occurred", "details": str(e)}), 500
 
 
 def getAllJobs():

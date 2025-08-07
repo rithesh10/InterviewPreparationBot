@@ -2,9 +2,9 @@ import os
 from marshmallow import ValidationError
 from flask import request, jsonify,g
 from werkzeug.utils import secure_filename
-from app.services.cloudinary_service import upload_to_cloudinary  # Your Cloudinary upload function
+from app.services.cloudinary_service import upload_to_cloudinary  
 import fitz
-from docx import Document 
+from docx import Document
 from app.models.Resume_Model import ResumeSchema
 from datetime import datetime,timezone
 from db.db import mongo
@@ -29,17 +29,17 @@ def extract_text(file, filename):
         file_ext = filename.split(".")[-1].lower()
 
         if file_ext == "pdf":
-            file.seek(0)  # Reset pointer before reading
+            file.seek(0) 
             pdf_document = fitz.open(stream=file.read(), filetype="pdf")
             text = "\n".join([page.get_text("text") for page in pdf_document])
 
         elif file_ext == "docx":
-            file.seek(0)  # Reset pointer before reading
+            file.seek(0) 
             doc = Document(file)
             text = "\n".join([para.text for para in doc.paragraphs])
 
         else:
-            return None  # Unsupported file type
+            return None 
 
         return text.strip()
 
@@ -65,29 +65,22 @@ def upload_resume():
         if not allowed_file(filename):
             return jsonify({"error": "Invalid file type. Only PDF and DOCX allowed"}), 400
 
-        # ✅ 3. Extract text before uploading
-        file.seek(0)  # Reset file pointer
+        file.seek(0)  
         extracted_text = extract_text(file, filename)
 
-        # ✅ 4. Upload file to Cloudinary or Storage
-        file.seek(0)  # Reset again before uploading
+        file.seek(0)  
         resume_url = upload_to_cloudinary(file)
         
-        # ✅ 5. Extract other form data (NOT JSON)
         user_name=g.user["full_name"]
-        user_id = g.user["_id"]  # Extract from JWT
-        skills = request.form.getlist("skills")  # Extract list
+        user_id = g.user["_id"]  
+        skills = request.form.getlist("skills")  
         experience = request.form.get("experience", 0)
         job_id=request.form.get("_id")
-        # job_idjob_id)
-        # Convert experience to integer safely
         try:
             experience = int(experience)
         except ValueError:
-            # print()
             return jsonify({"error": "Experience must be a valid integer"}), 400
 
-        # ✅ 6. Create the resume document
         resume = {
             "user_id": user_id,
             "file_url": resume_url,
@@ -100,17 +93,14 @@ def upload_resume():
         }
         # print(resume)
 
-        # ✅ 7. Validate schema
         errors = resume_schema.validate(resume)
         if errors:
             print(str(errors))
             return jsonify({"error": "Validation failed", "details": errors}), 400
         
-        # ✅ 8. Insert into MongoDB
         resume= mongo.db.resume.insert_one(resume)
         # print(resume)
 
-        # ✅ 9. Return success response
         return jsonify({
             "message": "Resume uploaded successfully",
             # "resume": resume
@@ -121,8 +111,8 @@ def upload_resume():
         return jsonify({"error": str(e)}), 500
 
 def get_by_jobId(id):
-    resumes = mongo.db.resume.find({"job_id": id})  # Fetch resumes matching job_id
-    resumes_list = list(resumes)  # Convert cursor to list
+    resumes = mongo.db.resume.find({"job_id": id})  
+    resumes_list = list(resumes)  
 
     if not resumes_list:
         return jsonify({"message": "No resumes found"}), 404
@@ -133,7 +123,7 @@ def get_by_jobId(id):
 
     return jsonify({
         "message": "Fetched successfully",
-        "resumes": resumes_list  # Directly return list (no need for json_util.dumps)
+        "resumes": resumes_list  
     }), 200
 
 def get_by_user_id(id):
@@ -153,16 +143,16 @@ def get_by_user_id(id):
         return jsonify({"message":"Internal server error","details":str(e)}),500
 def get_by_Id(id):
     try:
-        object_id = ObjectId(id)  # ✅ Convert id to ObjectId before querying
+        object_id = ObjectId(id)  
     except:
-        return jsonify({"message": "Invalid ID format"}), 400  # Handle invalid ObjectId
+        return jsonify({"message": "Invalid ID format"}), 400 
 
-    resume = mongo.db.resume.find_one({"_id": object_id})  # ✅ `find_one()` returns a dictionary
+    resume = mongo.db.resume.find_one({"_id": object_id})  
     resume["_id"]=ObjectId(resume["_id"])
     if not resume:
-        return jsonify({"message": "No resume found"}), 404  # ✅ Fixed message
+        return jsonify({"message": "No resume found"}), 404  
 
     return jsonify({
         "message": "Fetched successfully",
-        "resume": json_util.loads(json_util.dumps(resume))  # ✅ Convert BSON to JSON
+        "resume": json_util.loads(json_util.dumps(resume)) 
     }), 200

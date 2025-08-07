@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import config from "../../config/config"; // Assuming backend URL config
-import Test from "./Test"; // Assuming you have an InterviewTest component for starting the interview
+import config from "../../config/config"; 
+import Test from "./Test"; 
 
 const Interview = ({ userId }) => {
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [selectedInterview, setSelectedInterview] = useState(null); // <--- new state
+  const [selectedInterview, setSelectedInterview] = useState(null);
 
   useEffect(() => {
     if (!userId) {
@@ -84,7 +84,7 @@ const Interview = ({ userId }) => {
 
 
   const startInterview = (resumeText, jobDescription) => {
-    setSelectedInterview({ resumeText, jobDescription }); // <--- set the selected interview
+    setSelectedInterview({ resumeText, jobDescription }); 
   };
 
   if (selectedInterview) {
@@ -92,7 +92,7 @@ const Interview = ({ userId }) => {
       <Test
         resumeText={selectedInterview.resumeText}
         jobDescription={selectedInterview.jobDescription}
-        onBack={() => setSelectedInterview(null)} // <--- back button sets it to null
+        onBack={() => setSelectedInterview(null)} 
       />
     );
   }

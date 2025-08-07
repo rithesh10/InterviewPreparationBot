@@ -9,10 +9,10 @@ class JobSchema(Schema):
     salary_range = fields.String()
     posted_date = fields.DateTime()
     application_deadline = fields.DateTime()
-    employment_type = fields.String()  # e.g., "Full-Time", "Part-Time", "Contract"
+    employment_type = fields.String()  #"Full-Time", "Part-Time", "Contract"
     skills_required = fields.List(fields.String(), required=True)
-    experience_level = fields.Integer()  # e.g., "Entry-Level", "Mid-Level", "Senior"
-    status = fields.String(default="Open")  # "Open", "Closed"
+    experience_level = fields.Integer()  #"Entry-Level", "Mid-Level", "Senior"
+    status = fields.String(default="Open")  #"Open", "Closed"
 
 job_schema = JobSchema()
 jobs_schema = JobSchema(many=True)

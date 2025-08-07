@@ -19,7 +19,6 @@ const LoginPage = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // Clear error when user starts typing again
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -51,7 +50,7 @@ const LoginPage = () => {
     }
   
     setIsLoading(true);
-    setMessage(""); // Clear previous messages
+    setMessage("");
   
    try {
   const response = await axios.post(`${config.backendUrl}/users/login`, formData, {
