@@ -21,34 +21,44 @@ const ResumeUpload = ({ job, onBack }) => {
   };
 
   // Handle form submission
-  const handleJobApplication = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("_id", job._id);
-      formData.append("experience", experience);
-      formData.append("resume", resume);
+ const handleJobApplication = async () => {
+  try {
+    const formData = new FormData();
+    formData.append("_id", job._id);
+    formData.append("experience", experience);
+    formData.append("resume", resume);
 
-      // Append skills as an array
-      skills.forEach((skill, index) => {
-        formData.append(`skills[${index}]`, skill);
-      });
+    // Append skills as an array
+    skills.forEach((skill, index) => {
+      formData.append(`skills[${index}]`, skill);
+    });
 
-      const response = await axios.post(
-        `${config.backendUrl}/resume/upload-resume`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true, // Ensure cookies are sent
-        }
-      );
-      alert("Application submitted successfully");
-      console.log("Application submitted successfully:", response.data);
-    } catch (error) {
-      console.error("Error submitting application:", error);
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      alert("User is not authenticated. Please login again.");
+      return;
     }
-  };
+
+    const response = await axios.post(
+      `${config.backendUrl}/resume/upload-resume`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${accessToken}`,  // Add Authorization header
+        },
+        // Remove withCredentials since token is sent explicitly
+      }
+    );
+
+    alert("Application submitted successfully");
+    console.log("Application submitted successfully:", response.data);
+  } catch (error) {
+    console.error("Error submitting application:", error);
+    alert("Failed to submit application. Please try again.");
+  }
+};
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">

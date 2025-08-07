@@ -11,29 +11,39 @@ const JobForm = ({ fetchJobs, setError }) => {
   });
 
   const handleJobPost = async () => {
-    try {
-      const payload = {
-        ...newJob,
-        skills_required: newJob.skills_required.split(',').map(skill => skill.trim()),
-        requirements: newJob.requirements.split(',').map(req => req.trim()),
-        experience_level: parseInt(newJob.experience_level),
-        application_deadline: new Date(newJob.application_deadline).toISOString()
-      };
+  try {
+    const payload = {
+      ...newJob,
+      skills_required: newJob.skills_required.split(',').map(skill => skill.trim()),
+      requirements: newJob.requirements.split(',').map(req => req.trim()),
+      experience_level: parseInt(newJob.experience_level),
+      application_deadline: new Date(newJob.application_deadline).toISOString()
+    };
 
-      await axios.post(`${config.backendUrl}/jobs/jobs`, payload, { withCredentials: true });
-
-      fetchJobs();
-      setNewJob({
-        title: "", company: "", location: "", salary_range: "",
-        skills_required: "", application_deadline: "", experience_level: "",
-        employment_type: "", description: "", requirements: ""
-      });
-      setShowForm(false);
-      alert("Job posted successfully!");
-    } catch (error) {
-      setError("Failed to post job. Please try again.");
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      setError("User is not authenticated. Please login again.");
+      return;
     }
-  };
+
+    await axios.post(`${config.backendUrl}/jobs/jobs`, payload, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    fetchJobs();
+    setNewJob({
+      title: "", company: "", location: "", salary_range: "",
+      skills_required: "", application_deadline: "", experience_level: "",
+      employment_type: "", description: "", requirements: ""
+    });
+    setShowForm(false);
+    alert("Job posted successfully!");
+  } catch (error) {
+    setError("Failed to post job. Please try again.");
+  }
+};
 
   return (
     <>

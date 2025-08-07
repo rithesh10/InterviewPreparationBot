@@ -1,24 +1,25 @@
-# # from app.config import Config
-API_KEY="AIzaSyBXHxyQvTsXUoDB8pWiT0CF7ilGZoMzSE0"
+import os
+from openai import OpenAI
 
+client = OpenAI(
+    base_url="https://router.huggingface.co/v1",
+    api_key=os.environ["HF_TOKEN"],
+)
 
-# # Your Gemini API Key
-import google.generativeai as genai
-genai.configure(api_key=API_KEY)
-
-
-# # Create the model instance
-model = genai.GenerativeModel("gemini-1.5-pro-latest")
-
-
-async def generate_prompt(prompt):
+def generate_prompt(prompt: str) -> str:
+    """
+    Generate chat completion from the prompt using OpenAI client synchronously.
+    """
     try:
-        # Here's the key change - we need to await the generate_content call
-        response = await model.generate_content(prompt)
-        # The response object itself is not awaitable
-        return response.text
+        completion = client.chat.completions.create(
+            model="openai/gpt-oss-120b:novita",
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return completion.choices[0].message.content
     except Exception as e:
-        print("Error generating content:", str(e))
-        return "Error: " + str(e)
-# Running async function
+        print("Error generating content:", e)
+        raise
 
+# Usage:
+# response = generate_prompt("What is the capital of France?")
+# print(response)

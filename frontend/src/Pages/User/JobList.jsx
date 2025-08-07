@@ -12,19 +12,29 @@ const JobList = () => {
     getJobs();
   }, []);
 
-  const getJobs = async () => {
-    try {
-      const response = await axios.get(`${config.backendUrl}/jobs/jobs`, {
-        withCredentials: true,
-      });
-
-      if (response.status === 200) {
-        setJobs(response.data.jobs);
-      }
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
+ const getJobs = async () => {
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      console.error("No access token found. User might not be authenticated.");
+      // Optionally, redirect to login or show a message
+      return;
     }
-  };
+
+    const response = await axios.get(`${config.backendUrl}/jobs/jobs`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (response.status === 200) {
+      setJobs(response.data.jobs || []);
+    }
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+  }
+};
+
 
   if (selectedJob) {
     return <JobDetails job={selectedJob} onBack={() => setSelectedJob(null)} />;

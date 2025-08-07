@@ -1,4 +1,5 @@
 from app.__init__ import create_app
+from asgiref.wsgi import WsgiToAsgi
 
 app = create_app()
 

@@ -53,27 +53,35 @@ const LoginPage = () => {
     setIsLoading(true);
     setMessage(""); // Clear previous messages
   
-    try {
-      const response = await axios.post(`${config.backendUrl}/users/login`, formData, {
-        withCredentials: true
-      });
-  
-      if (response.status === 200) {
-        const user = response.data.user;
-        login(user);
-        console.log(user);
-  
-        // Redirect based on role
-        if (user?.role === "user") {
-          navigate("/user", { state: { userId: user._id } });
-        } else if (user?.role === "admin") {
-          navigate("/admin", { state: { userId: user._id } });
-        } else {
-          console.error("Unknown role:", user.role);
-          setMessage("Unexpected role assigned.");
-        }
-      }
-    } catch (error) {
+   try {
+  const response = await axios.post(`${config.backendUrl}/users/login`, formData, {
+    withCredentials: true
+  });
+
+  if (response.status === 200) {
+    const user = response.data.user;
+    const accessToken = response.data.accessToken;
+    const refreshToken = response.data.refreshToken;
+
+    // Store tokens in localStorage
+    if (accessToken) localStorage.setItem("accessToken", accessToken);
+    if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+
+    login(user);
+    console.log(user);
+
+    // Redirect based on role
+    if (user?.role === "user") {
+      navigate("/user", { state: { userId: user._id } });
+    } else if (user?.role === "admin") {
+      navigate("/admin", { state: { userId: user._id } });
+    } else {
+      console.error("Unknown role:", user.role);
+      setMessage("Unexpected role assigned.");
+    }
+  }
+} 
+ catch (error) {
       setIsLoading(false);
   
       if (error.response) {

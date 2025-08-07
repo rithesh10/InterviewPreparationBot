@@ -57,18 +57,22 @@ def add_resume_ranking_by_ResumeId(id):
         """
 
         # Call Gemini model
-        response = model.generate_content(prompt)
-        response_text = re.sub(r'```json|```', '', response.text).strip()
-        parsed_response = json.loads(response_text)
+        # response = model.generate_content(prompt)
+        # response_text = re.sub(r'```json|```', '', response.text).strip()
+        # parsed_response = json.loads(response_text)
 
-        print("Gemini Raw Response:", response.text)
-        print("Parsed Response:", parsed_response)
+        # print("Gemini Raw Response:", response.text)
+        # print("Parsed Response:", parsed_response)
 
-        ai_score = parsed_response.get("score", 0)
-        matching_skills = parsed_response.get("matching_skills", [])
+        # ai_score = parsed_response.get("score", 0)
+        # matching_skills = parsed_response.get("matching_skills", [])
 
         # Identify missing skills
+        # missing_skills = [skill for skill in job["skills_required"] if skill not in matching_skills]
+        ai_score = find_the_score(resume["resume_text"], job["description"])
+        matching_skills = find_the_fields(resume["resume_text"], job["skills_required"])
         missing_skills = [skill for skill in job["skills_required"] if skill not in matching_skills]
+        user_id = resume["user_id"]
 
         # Handle experience matching
         experience_mapping = {

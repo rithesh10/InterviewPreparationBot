@@ -6,16 +6,29 @@ import { Link } from "react-router-dom";
 
 const JobList = ({ jobs, fetchResumes, setSelectedJob, fetchJobs }) => {
   const handleDeleteJob = async (jobId) => {
-    if (!window.confirm("Are you sure you want to delete this job?")) return;
+  if (!window.confirm("Are you sure you want to delete this job?")) return;
 
-    try {
-      await axios.delete(`${config.backendUrl}/jobs/jobs/${jobId}`, { withCredentials: true });
-      fetchJobs();
-      alert("Job deleted successfully!");
-    } catch (error) {
-      alert("Failed to delete job. Please try again.");
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      alert("You must be logged in to delete a job.");
+      return;
     }
-  };
+
+    await axios.delete(`${config.backendUrl}/jobs/jobs/${jobId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    fetchJobs();
+    alert("Job deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting job:", error);
+    alert("Failed to delete job. Please try again.");
+  }
+};
+
 
   return (
     <div className="bg-white shadow-xl rounded-xl p-6 max-w-4xl mx-auto mt-10">

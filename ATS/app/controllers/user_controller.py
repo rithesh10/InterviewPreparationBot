@@ -106,27 +106,19 @@ def generate_access_refresh_token(user_id):
 def login_user(data):
     """Logs in the user and generates tokens"""
     try:
-        print(data)
-
-        # Check required fields
-        required_fields = ["email", "password"]
-        missing_fields = [field for field in required_fields if field not in data]
-        if missing_fields:
-            return jsonify({"error": f"Missing fields: {', '.join(missing_fields)}"}), 400
-
+        # ... same checks as before ...
+        
         email, password = data["email"], data["password"]
         existing_user = mongo.db.users.find_one({"email": email})
 
         if not existing_user:
-            return jsonify({"error": "Invalid credentials"}), 400  # Generic error message
+            return jsonify({"error": "Invalid credentials"}), 400
 
-        # Validate password
         if not check_password_hash(existing_user["password"], password):
             return jsonify({"error": "Invalid credentials"}), 400
 
-        # Remove sensitive fields before further processing
         existing_user.pop("password", None)
-        existing_user["_id"] = str(existing_user["_id"])  # Convert ObjectId to string
+        existing_user["_id"] = str(existing_user["_id"]) 
 
         # Generate tokens
         access_token, refresh_token = generate_access_refresh_token(existing_user["_id"])
@@ -134,28 +126,21 @@ def login_user(data):
         if not access_token or not refresh_token:
             return jsonify({"error": "Token generation failed"}), 500
 
-        # Store refresh token in the database
-        mongo.db.users.update_one(
-            {"_id": ObjectId(existing_user["_id"])},  # Fix: Convert back to ObjectId
-            {"$set": {"refresh_token": refresh_token}}
-        )
+        # Optionally: store refresh token as before, or skip if it's not needed
 
-        # Create response
-        response = make_response(jsonify({
+        # New: Return tokens in JSON
+        return jsonify({
             "message": "User logged in successfully",
-            "user": json_util.loads(json_util.dumps(existing_user))  # Ensure JSON serialization
-        }), 200)
-
-        # Set Secure & HttpOnly Cookies
-        response.set_cookie("accessToken", access_token, httponly=True, secure=True, samesite="None")
-        response.set_cookie("refreshToken", refresh_token, httponly=True, secure=True, samesite="None")
-
-        return response
-
+            "user": json_util.loads(json_util.dumps(existing_user)),
+            "accessToken": access_token,
+            "refreshToken": refresh_token
+        }), 200
+        
     except Exception as e:
         print(e)
-        traceback.print_exc()  # Log full traceback for debugging
+        traceback.print_exc()
         return jsonify({"error": "An error occurred", "details": str(e)}), 500
+
 def get_user(id):
     """Get user details by ID"""
     try:

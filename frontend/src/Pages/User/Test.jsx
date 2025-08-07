@@ -16,78 +16,112 @@ const Test = ({ resumeText, jobDescription, onBack, userId }) => {
     startInterviewSession();
   }, []);
 
-  const startInterviewSession = async () => {
-    try {
-      setIsLoading(true);
-      // Start the interview directly with the provided resumeText and jobDescription
-      const response = await axios.post(`${config.backendUrl}/gemini/start_interview_session`, {
-        resume_summary: resumeText,
-        jd_summary: jobDescription
-      }, {
-        withCredentials: true,
-      });
+ const startInterviewSession = async () => {
+  try {
+    setIsLoading(true);
 
-      setQuestion(response.data.question);
-      setInterviewId(response.data.interview_id);
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      setError("User is not authenticated. Please login again.");
       setIsLoading(false);
-    } catch (error) {
-      console.error("Error starting interview:", error);
-      setError("Failed to start the interview. Please try again.");
-      setIsLoading(false);
-    }
-  };
-
-  const handleAnswerChange = (e) => {
-    setCurrentAnswer(e.target.value);
-  };
-
-  const handleSubmitAnswer = async () => {
-    if (!currentAnswer.trim()) {
-      setError("Please provide an answer before submitting.");
       return;
     }
 
-    try {
-      setIsLoading(true);
-      
-      // Submit the answer to the backend
-      const response = await axios.post(`${config.backendUrl}/gemini/answer_interview_question`, {
-        interview_id: interviewId,
-        answer: currentAnswer
-      }, {
-        withCredentials: true,
-      });
-
-      // Check if interview is concluded
-      if (response.data.status === "concluded" || response.data.interview_score === true) {
-        setIsCompleted(true);
-        // Fetch the interview assessment
-        fetchInterviewScore();
-      } else {
-        // Set the next question
-        setQuestion(response.data.question);
-        setCurrentAnswer(""); // Clear the answer field for the next question
+    // Start the interview with authorization header instead of cookies
+    const response = await axios.post(
+      `${config.backendUrl}/gemini/start_interview_session`,
+      {
+        resume_summary: resumeText,
+        jd_summary: jobDescription,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       }
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error submitting answer:", error);
-      setError("Failed to submit your answer. Please try again.");
-      setIsLoading(false);
-    }
-  };
+    );
 
-  const fetchInterviewScore = async () => {
-    try {
-      const response = await axios.get(`${config.backendUrl}/gemini/calculate-scores/${interviewId}`, {
-        withCredentials: true,
-      });
-      setAssessmentResult(response.data);
-    } catch (error) {
-      console.error("Error fetching interview score:", error);
-      setError("Failed to calculate interview score.");
+    setQuestion(response.data.question);
+    setInterviewId(response.data.interview_id);
+    setIsLoading(false);
+  } catch (error) {
+    console.error("Error starting interview:", error);
+    setError("Failed to start the interview. Please try again.");
+    setIsLoading(false);
+  }
+};
+
+const handleAnswerChange = (e) => {
+  setCurrentAnswer(e.target.value);
+};
+
+const handleSubmitAnswer = async () => {
+  if (!currentAnswer.trim()) {
+    setError("Please provide an answer before submitting.");
+    return;
+  }
+
+  try {
+    setIsLoading(true);
+
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      setError("User is not authenticated. Please login again.");
+      setIsLoading(false);
+      return;
     }
-  };
+
+    // Submit the answer with authorization header
+    const response = await axios.post(
+      `${config.backendUrl}/gemini/answer_interview_question`,
+      {
+        interview_id: interviewId,
+        answer: currentAnswer,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (response.data.status === "concluded" || response.data.interview_score === true) {
+      setIsCompleted(true);
+      fetchInterviewScore();
+    } else {
+      setQuestion(response.data.question);
+      setCurrentAnswer(""); // reset answer field for next question
+    }
+
+    setIsLoading(false);
+  } catch (error) {
+    console.error("Error submitting answer:", error);
+    setError("Failed to submit your answer. Please try again.");
+    setIsLoading(false);
+  }
+};
+
+const fetchInterviewScore = async () => {
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      setError("User is not authenticated. Please login again.");
+      return;
+    }
+
+    const response = await axios.get(`${config.backendUrl}/gemini/calculate-scores/${interviewId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    setAssessmentResult(response.data);
+  } catch (error) {
+    console.error("Error fetching interview score:", error);
+    setError("Failed to calculate interview score.");
+  }
+};
+
 
   if (isLoading) {
     return (

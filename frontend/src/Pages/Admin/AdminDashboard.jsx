@@ -21,31 +21,57 @@ const AdminDashboard = () => {
   }, []);
 
   const fetchJobs = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`${config.backendUrl}/jobs/jobs`, { withCredentials: true });
-      setJobs(response.data.jobs || []);
-      setError(null);
-    } catch (error) {
-      setError("Failed to fetch job listings. Please try again.");
-    } finally {
+  setIsLoading(true);
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      setError("User is not authenticated. Please login again.");
       setIsLoading(false);
+      return;
     }
-  };
 
-  const fetchResumes = async (jobId) => {
-    setIsLoading(true);
-    try {
-      setJobId(jobId)
-      const response = await axios.get(`${config.backendUrl}/resume/get-resume-jobId/${jobId}`, { withCredentials: true });
-      setResumes(response.data.resumes || []);
-      setError(null);
-    } catch (error) {
-      setError("Failed to fetch resumes. Please try again.");
-    } finally {
+    const response = await axios.get(`${config.backendUrl}/jobs/jobs`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    setJobs(response.data.jobs || []);
+    setError(null);
+  } catch (error) {
+    setError("Failed to fetch job listings. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+const fetchResumes = async (jobId) => {
+  setIsLoading(true);
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      setError("User is not authenticated. Please login again.");
       setIsLoading(false);
+      return;
     }
-  };
+
+    setJobId(jobId);
+
+    const response = await axios.get(`${config.backendUrl}/resume/get-resume-jobId/${jobId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    setResumes(response.data.resumes || []);
+    setError(null);
+  } catch (error) {
+    setError("Failed to fetch resumes. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-6">

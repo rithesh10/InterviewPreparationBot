@@ -22,26 +22,31 @@ const JobDescription = () => {
     fetchJob();
   }, [id]);
 
-  const fetchJob = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`${config.backendUrl}/jobs/job/${id}`, {
-        withCredentials: true,
-      });
+ const fetchJob = async () => {
+  setIsLoading(true);
+  try {
+    const accessToken = localStorage.getItem("accessToken");
 
-      if (response.status === 404) {
-        throw new Error("Failed to fetch job details");
-      }
+    const response = await axios.get(`${config.backendUrl}/jobs/job/${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
-      const data = await response.data.job;
-      setJob(data);
-    } catch (error) {
-      console.error("Error fetching job:", error);
-      setMessage("Failed to fetch job details.");
-    } finally {
-      setIsLoading(false);
+    if (response.status === 404) {
+      throw new Error("Failed to fetch job details");
     }
-  };
+
+    const data = response.data.job;  // no need for await here, response.data is not a promise
+    setJob(data);
+  } catch (error) {
+    console.error("Error fetching job:", error);
+    setMessage("Failed to fetch job details.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const renderJobHeader = () => (
     <div className="bg-gradient-to-r from-indigo-700 to-purple-700 text-white p-8 rounded-t-xl shadow-lg">

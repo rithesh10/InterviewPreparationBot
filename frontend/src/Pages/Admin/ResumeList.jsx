@@ -16,22 +16,34 @@ const ResumeList = () => {
   }, [id]); // ✅ Fetch resumes when jobId changes
 
   const fetchResumes = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(
-        `${config.backendUrl}/resume/get-resume-jobId/${id}`,
-        { withCredentials: true }
-      );
-      setMessage(response.data.message);
-      setResumes(response.data.resumes);
-      setError(null);
-    } catch (error) {
-      console.error(error);
-      setError("Failed to fetch the resumes");
-    } finally {
+  setIsLoading(true);
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      setError("User is not authenticated. Please login again.");
       setIsLoading(false);
+      return;
     }
-  };
+
+    const response = await axios.get(
+      `${config.backendUrl}/resume/get-resume-jobId/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    setMessage(response.data.message);
+    setResumes(response.data.resumes);
+    setError(null);
+  } catch (error) {
+    console.error(error);
+    setError("Failed to fetch the resumes");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const calculateScores = async () => {
     try {

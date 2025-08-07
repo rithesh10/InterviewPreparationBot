@@ -6,18 +6,9 @@ from db.db import mongo
 import asyncio
 from bson import ObjectId,json_util
 import json
+import asyncio
 from pymongo.errors import PyMongoError
-API_KEY="AIzaSyBXHxyQvTsXUoDB8pWiT0CF7ilGZoMzSE0"
-
-
-# # Your Gemini API Key
-import google.generativeai as genai
-genai.configure(api_key=API_KEY)
-
-
-# # Create the model instance
-model = genai.GenerativeModel("gemini-1.5-pro-latest")
-
+from app.Gemini.gemini import generate_prompt
 def start_interview():
     """Start the interview process."""
     try:
@@ -34,7 +25,7 @@ def start_interview():
 
         Ask the first question.
         """
-        question = model.generate_content(prompt).text
+        question =  generate_prompt(prompt=prompt)
         print(question)
         
         # Save interview session to MongoDB
@@ -102,7 +93,7 @@ def answer_question():
         """
         
         # Generate next question
-        next_question = model.generate_content(prompt).text
+        next_question =  generate_prompt(prompt=prompt)
         
         # Append question
         interview_session['qa_history'].append({"q": next_question, "a": ""})
@@ -162,7 +153,7 @@ def summary_of_text():
         """
         
         # Generate resume summary
-        resume_summary = model.generate_content(resume_prompt).text
+        resume_summary = generate_prompt(prompt=resume_prompt)
         
         # Create a prompt to summarize the job description
         job_desc_prompt = f"""
@@ -171,7 +162,7 @@ def summary_of_text():
         """
         
         # Generate job description summary
-        job_summary = model.generate_content(job_desc_prompt).text
+        job_summary = generate_prompt(prompt=job_desc_prompt)
         
         return jsonify({
             "resume_summary": resume_summary,
@@ -231,16 +222,16 @@ def calculate_score(id):
         """
 
         # Call the model to generate content based on the prompt
-        response = model.generate_content(prompt)
+        response =  generate_prompt(prompt=prompt)
 
-        if not response or not hasattr(response, 'text') or not response.text.strip():
+        if not response or not hasattr(response, 'text') or not response.strip():
             return jsonify({"error": "Received empty or invalid response from the model"}), 500
 
         # Print the raw response for debugging
-        print("Raw response from model:", response.text)
+        # print("Raw response from model:", response.text)
 
         # Use regex to remove ```json and ``` backticks
-        response_text = re.sub(r'```json|```', '', response.text).strip()
+        response_text = re.sub(r'```json|```', '', response).strip()
 
         # Try parsing the JSON response
         try:

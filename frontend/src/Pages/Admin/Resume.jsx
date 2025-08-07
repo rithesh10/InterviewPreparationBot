@@ -12,16 +12,26 @@ const ResumeDetail = () => {
     fetchResume();
   }, [id]);
 
-  const fetchResume = async () => {
-    try {
-      const response = await axios.get(`${config.backendUrl}/resume/${id}`, {
-        withCredentials: true,
-      });
-      setResume(response.data.resume);
-    } catch (err) {
-      setError("Failed to load resume details.");
+ const fetchResume = async () => {
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      setError("User is not authenticated. Please login again.");
+      return;
     }
-  };
+
+    const response = await axios.get(`${config.backendUrl}/resume/${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    setResume(response.data.resume);
+  } catch (err) {
+    setError("Failed to load resume details.");
+  }
+};
+
 
   if (error) return <p className="text-red-600 font-medium">{error}</p>;
   if (!resume) return <p className="text-gray-500">Loading...</p>;

@@ -4,19 +4,29 @@ from bson import ObjectId
 from datetime import datetime,timezone
 from app.models.job_model import job_schema,jobs_schema
 from app.middleware.auth_middleware import verify_jwt
+import google.generativeai as genai
+import requests
+import json
+
+
+# # Create the model instance
 def createJob(data):
     try:
-
+        # Add posted_date
+        data["posted_date"] = datetime.now(timezone.utc).isoformat()
+        # Now validate the complete data (with title, company, location, etc.)
         errors = job_schema.validate(data)
         if errors:
             return jsonify({"error": errors}), 400
 
-        data["posted_date"] = datetime.now(timezone.utc)
-        job_id = mongo.db.jobs.insert_one(data).inserted_id
+        # Insert into MongoDB
+        job = mongo.db.jobs.insert_one(data)
 
-        return jsonify({"message": "Job created successfully", "job_id": str(job_id)}), 201
+        return jsonify({"message": "Job created successfully", "job_id": str(job.inserted_id)}), 201
+
     except Exception as e:
         return jsonify({"error": "An error occurred", "details": str(e)}), 500
+
 
 def getAllJobs():
     try:
