@@ -18,9 +18,17 @@ const PerformanceMain = ({ userId }) => {
       }
 
       try {
+        const accessToken=localStorage.get("accessToken")
+        if(!accessToken)
+        {
+          console.error('Unauthorized')
+        }
         const response = await axios.get(
           `${config.backendUrl}/gemini/get-calculated-score/${userId}`,
-          { withCredentials: true }
+          {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      }}
         );
         setInterviewData(response.data);
       } catch (err) {

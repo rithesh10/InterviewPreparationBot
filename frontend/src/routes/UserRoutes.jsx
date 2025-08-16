@@ -24,15 +24,15 @@ const UserRoutes = () => {
       <Routes>
         <Route element={<ProtectedRoutes role="user" />}>
           <Route path="/" element={<UserDashboard />} />
-          <Route path="jobs" element={<JobList />} />
+          <Route path="/jobs" element={<JobList />} />
           <Route path="/three-steps" element={<ThreeStepsComponent />} />
           <Route path="/learning" element={<LearningDashboard />} />
           <Route path="/Resumematcher" element={<Resumematcher />} />
           <Route path="/languages" element={<Languages />} />
           <Route path="/topics/:language" element={<TopicsList />} />
           <Route path="/interview" element={<Interview userId={user?._id} />} /> 
-          <Route path="interview" element={<Interview userId={user?._id} />} /> 
-          <Route path="performance" element={<PerformanceMain userId={user?._id} />} /> 
+          {/* <Route path="interview" element={<Interview userId={user?._id} />} />  */}
+          <Route path="/performance" element={<PerformanceMain userId={user?._id} />} /> 
           <Route path="performance" element={<Performance userId={user?._id} />} /> 
         </Route>
       </Routes>
