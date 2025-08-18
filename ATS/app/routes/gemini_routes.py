@@ -23,7 +23,7 @@ def summarizer():
 def calculate(id):
     return calculate_score(id)
 
-@gemini_bp.route("get-calculated-score/<id>",methods=["GET"])
+@gemini_bp.route("/get-calculated-score/<id>",methods=["GET"])
 @verify_jwt
 def getCalculatedScore(id):
     return get_calculated_score(id)

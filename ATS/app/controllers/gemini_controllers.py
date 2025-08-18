@@ -168,19 +168,31 @@ def summary_of_text():
         return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
 def calculate_score(id):
     try:
-        object_id = ObjectId(id)
+        print(f"[DEBUG] Incoming interview session ID: {id}")
+
+        # Convert to ObjectId
+        try:
+            object_id = ObjectId(id)
+            print(f"[DEBUG] Converted to ObjectId: {object_id}")
+        except Exception as conv_err:
+            print(f"[ERROR] Failed to convert ID to ObjectId: {conv_err}")
+            return jsonify({"error": "Invalid ID format"}), 400
+
+        # Fetch interview data
         interview_data = mongo.db.interview_sessions.find_one({"_id": object_id})
-    
-        
+        print(f"[DEBUG] Interview data fetched: {interview_data is not None}")
+
         if not interview_data:
             return jsonify({"error": "Interview session not found"}), 404
-        
+
         qa_data = interview_data.get("qa_history")
-        user_id = g.user["_id"] 
+        print(f"[DEBUG] QA Data length: {len(qa_data) if qa_data else 'None'}")
+
+        user_id = g.user.get("_id") if hasattr(g, "user") else None
+        print(f"[DEBUG] Extracted user_id: {user_id}")
 
         if not qa_data:
             return jsonify({"error": "Q&A history is missing"}), 400
-        
         if not user_id:
             return jsonify({"error": "User ID missing in interview session data"}), 400
 
@@ -212,39 +224,49 @@ def calculate_score(id):
 
                     Maintain a critical, unemotional tone. Never assume intent — judge only based on the content of the Q&A.
                     """
+        print("[DEBUG] Prompt prepared for model call.")
 
+        # Call model
+        response = generate_prompt(prompt=prompt)
+        print(f"[DEBUG] Raw response type: {type(response)}")
 
-        # Call the model to generate content based on the prompt
-        response =  generate_prompt(prompt=prompt)
+        # Get response text safely
+        response_text = response.text if hasattr(response, "text") else str(response)
+        print(f"[DEBUG] Raw response text length: {len(response_text)}")
 
-        if not response or not hasattr(response, 'text') or not response.strip():
-            return jsonify({"error": "Received empty or invalid response from the model"}), 500
+        # Clean up common wrappers like ```json ... ```
+        cleaned_text = re.sub(r"```json|```", "", response_text, flags=re.IGNORECASE).strip()
 
-        # Print the raw response for debugging
-        # print("Raw response from model:", response.text)
+        # Try to extract the first {...} block
+        match = re.search(r"\{.*\}", cleaned_text, re.DOTALL)
+        if match:
+            json_str = match.group(0).strip()
+        else:
+            # fallback: maybe the whole response is JSON already
+            json_str = cleaned_text.strip()
 
-        # Use regex to remove ```json and ``` backticks
-        response_text = re.sub(r'```json|```', '', response).strip()
+        print(f"[DEBUG] Extracted JSON snippet:\n{json_str[:500]}...")
 
-        # Try parsing the JSON response
+        # Parse JSON
         try:
-            result = json.loads(response_text)
+            result = json.loads(json_str)
+            print("[DEBUG] JSON parsed successfully.")
         except json.JSONDecodeError as e:
-            return jsonify({"error": f"Failed to parse the model response as JSON: {str(e)}"}), 500
+            print(f"[ERROR] Failed to parse JSON: {e}")
+            return jsonify({"error": f"Failed to parse model response as JSON: {str(e)}"}), 500
 
-        if not isinstance(result, dict):
-            return jsonify({"error": "Invalid response format from model"}), 500
-        
+        # Add metadata
         result['user_id'] = user_id
         result['interview_session_id'] = str(object_id)
 
-        mongo.db.interview_scores.insert_one(result)
+        insert_result = mongo.db.interview_scores.insert_one(result)
+        print(f"[DEBUG] Inserted score doc ID: {insert_result.inserted_id}")
 
         return jsonify(result), 200
 
     except Exception as e:
+        print(f"[FATAL ERROR] {str(e)}", flush=True)
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
-
 
 def get_calculated_score(id):
     try:

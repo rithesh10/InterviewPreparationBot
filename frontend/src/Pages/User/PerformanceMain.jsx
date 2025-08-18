@@ -8,6 +8,7 @@ const PerformanceMain = ({ userId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  console.log(userId)
   useEffect(() => {
     console.log(userId)
     const fetchData = async () => {
@@ -18,7 +19,7 @@ const PerformanceMain = ({ userId }) => {
       }
 
       try {
-        const accessToken=localStorage.get("accessToken")
+        const accessToken=localStorage.getItem("accessToken")
         if(!accessToken)
         {
           console.error('Unauthorized')
@@ -42,7 +43,14 @@ const PerformanceMain = ({ userId }) => {
     fetchData();
   }, [userId]); 
   if (loading) {
-    return <div>Loading performance data...</div>;
+    return (
+      <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg text-center">
+        <div className="flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid mb-4"></div>
+          <p className="text-gray-700 font-medium">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
