@@ -6,26 +6,27 @@ const VoiceInput = ({ setCurrentAnswer }) => {
 
   const startListening = () => {
     if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
-      alert("Speech recognition not supported");
+      alert("Speech recognition not supported in this browser.");
       return;
     }
 
     if (recognition) {
-      recognition.stop(); 
+      recognition.stop();
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     const newRecognition = new SpeechRecognition();
     newRecognition.continuous = true;
-    newRecognition.interimResults = false;
+    newRecognition.interimResults = true; // live updating
     newRecognition.lang = "en-US";
 
     newRecognition.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map((result) => result[0].transcript)
-        .join("");
-      console.log("Voice input:", transcript);
-      setCurrentAnswer(transcript);
+      let transcript = "";
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript + " ";
+      }
+      setCurrentAnswer(transcript.trim()); // updates textarea live
     };
 
     newRecognition.onend = () => {
@@ -58,7 +59,7 @@ const VoiceInput = ({ setCurrentAnswer }) => {
           isRecording ? "bg-red-500" : "bg-green-500"
         } text-white`}
       >
-        {isRecording ? "Stop" : "Start"} Listening
+        {isRecording ? "Stop Listening" : "Start Listening"}
       </button>
     </div>
   );
