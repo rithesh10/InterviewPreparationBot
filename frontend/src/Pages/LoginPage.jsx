@@ -50,9 +50,7 @@ const LoginPage = () => {
     setMessage('');
 
     try {
-      const response = await axios.post(`${config.backendUrl}/users/login`, formData, {
-        withCredentials: true
-      });
+      const response = await axios.post(`${config.backendUrl}/users/login`, formData);
 
       if (response.status === 200) {
         const user = response.data.user;
