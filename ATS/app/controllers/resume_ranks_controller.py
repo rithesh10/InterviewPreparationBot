@@ -61,9 +61,13 @@ def add_resume_ranking_by_ResumeId(id):
 
         # Identify missing skills
         # missing_skills = [skill for skill in job["skills_required"] if skill not in matching_skills]
-        ai_score = find_the_score(resume["resume_text"], job["description"])
-        matching_skills = find_the_fields(resume["resume_text"], job["skills_required"])
-        missing_skills = [skill for skill in job["skills_required"] if skill not in matching_skills]
+        ai_score = find_the_score(resume["resume_text"].lower(), job["description"].lower() )
+        matching_skills = find_the_fields(resume["resume_text"].lower(), [skill.lower() for skill in job["skills_required"]])
+
+        missing_skills = [
+            skill for skill in job["skills_required"]
+            if skill.lower() not in [ms.lower() for ms in matching_skills]
+        ]       
         user_id = resume["user_id"]
 
         experience_mapping = {
@@ -79,16 +83,19 @@ def add_resume_ranking_by_ResumeId(id):
             "resume_id": str(resume["_id"]),
             "job_id": str(job["_id"]),
             "user_id": resume["user_id"],
-            "ai_score": ai_score,
+            "ai_score": round(ai_score,1),
             "matching_skills": matching_skills,
             "missing_skills": missing_skills,
             "suggestions": "Improve your skills to match the job requirements",
             "experience_match": resume.get("experience", 0) >= job_experience_level,
         }
-
+        # print(ranking_data)
         resume_score_data = {}
         try:
             resume_score_data = mongo.db.resume_rankings.insert_one(ranking_data)
+            # print(resume_score_data)
+            print( str(resume_score_data.inserted_id))
+            # print(resume_score_data._id)
         except Exception as db_error:
             print("Database Insert Error:", str(db_error))
             return jsonify({"error": "Failed to save ranking to database"}), 500

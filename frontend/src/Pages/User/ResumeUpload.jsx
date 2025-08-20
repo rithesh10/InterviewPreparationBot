@@ -19,17 +19,15 @@ const ResumeUpload = ({ job, onBack }) => {
   };
 
   // Handle form submission
- const handleJobApplication = async () => {
+const handleJobApplication = async () => {
   try {
     const formData = new FormData();
     formData.append("_id", job._id);
     formData.append("experience", experience);
     formData.append("resume", resume);
 
-    // Append skills as an array
-    skills.forEach((skill, index) => {
-      formData.append(`skills[${index}]`, skill);
-    });
+    // FIX: send skills as JSON string
+    formData.append("skills", JSON.stringify(skills));
 
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
@@ -43,9 +41,8 @@ const ResumeUpload = ({ job, onBack }) => {
       {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${accessToken}`,  // Add Authorization header
+          Authorization: `Bearer ${accessToken}`,
         },
-        // Remove withCredentials since token is sent explicitly
       }
     );
 

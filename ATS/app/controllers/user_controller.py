@@ -10,7 +10,7 @@ import traceback
 from datetime import datetime
 import os
 import jwt
-from app.middleware.auth_middleware import verify_jwt
+# from app.middleware.auth_middleware import verify_jwt
 
 ACCESS_TOKEN_OPTIONS = {
     "httponly": True,

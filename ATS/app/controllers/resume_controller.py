@@ -22,24 +22,21 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def extract_text(file, filename):
-    """
-    Extracts text from PDF, DOC, and DOCX files.
-    """
     try:
         file_ext = filename.split(".")[-1].lower()
 
         if file_ext == "pdf":
-            file.seek(0) 
+            file.seek(0)
             pdf_document = fitz.open(stream=file.read(), filetype="pdf")
             text = "\n".join([page.get_text("text") for page in pdf_document])
 
         elif file_ext == "docx":
-            file.seek(0) 
+            file.seek(0)
             doc = Document(file)
             text = "\n".join([para.text for para in doc.paragraphs])
 
         else:
-            return None 
+            return None
 
         return text.strip()
 
@@ -69,11 +66,13 @@ def upload_resume():
         extracted_text = extract_text(file, filename)
 
         file.seek(0)  
-        resume_url = upload_to_cloudinary(file)
+        # resume_url = upload_to_cloudinary(file)
+        resume_url=""
         
         user_name=g.user["full_name"]
         user_id = g.user["_id"]  
-        skills = request.form.getlist("skills")  
+        skills = request.form.getlist("skills") 
+        print(request.form.getlist("skills")) 
         experience = request.form.get("experience", 0)
         job_id=request.form.get("_id")
         try:
