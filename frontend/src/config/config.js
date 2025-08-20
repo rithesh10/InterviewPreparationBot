@@ -1,4 +1,4 @@
 const config={
-    backendUrl:"http://localhost:5000"
+    backendUrl:"https://interviewpreparationbot.onrender.com"
 }
 export default config
