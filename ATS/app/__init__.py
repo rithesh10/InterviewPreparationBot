@@ -7,9 +7,10 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config) 
 
-    CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+# from flask_cors import CORS
 
 
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:5173","https://interviewbot-mn3i.onrender.com"]}})
     init_mongo(app) 
     from app.routes.user_routes import user_bp
     from app.routes.resume_routes import resume_bp
