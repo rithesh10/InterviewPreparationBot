@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import React from "react";
+import config from '../config/config';
 import {  Link} from "react-router-dom";
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -25,7 +26,11 @@ const RegisterPage = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
+<<<<<<< HEAD
         "http://127.0.0.1:5000/users/register",
+=======
+        `${config.backendUrl}/users/register`,
+>>>>>>> 6eff670227a9cf6e798f746a9db0168050d22596
         formData
       );
       console.log("Registration Success:", response.data);
