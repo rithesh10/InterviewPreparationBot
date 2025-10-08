@@ -11,6 +11,9 @@ class Config:
     CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_CLOUD_KEY")
     CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_CLOUD_SECRET")
     FOLDER=UPLOAD_FOLDER
+    REDIS_HOST=os.getenv("REDIS_HOST")
+    REDIS_PASSWORD=os.getenv("REDIS_PASSWORD")
+    REDIS_PORT=os.getenv("REDIS_PORT")
     API_KEY=os.getenv("API_KEY")
 
     if not MONGO_URI:

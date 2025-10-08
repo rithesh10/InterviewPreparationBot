@@ -10,7 +10,7 @@ def create_job():
    return createJob(data)
 
 @job_bp.route("/jobs", methods=["GET"])
-@verify_jwt
+# @verify_jwt
 def get_all_jobs():
     return getAllJobs()
     

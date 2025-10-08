@@ -4,12 +4,9 @@ from bson import ObjectId
 from datetime import datetime, timezone
 from app.models.job_model import job_schema, jobs_schema
 from app.middleware.auth_middleware import verify_jwt
-# import google.generativeai as genai
-import requests
-import json
-
-
 # # Create the model instance
+from app.services.redis_service import r
+import json
 def createJob(data):
     try:
         # Add posted_date
@@ -46,22 +43,52 @@ def createJob(data):
 
 def getAllJobs():
     try:
+        jobs=r.get("getAllJobs")
+        print(r.ping())
+        if jobs:
+            #  jobs=json.loads(jobs.decode('utf-8'))
+             jobs=json.loads(jobs)
+             return jsonify({"jobs": jobs}), 200
         jobs = list(mongo.db.jobs.find())
         # print(jobs)
+        
         for job in jobs:
             job["_id"] = str(job["_id"])
-
+            for key, value in job.items():
+                if hasattr(value, 'isoformat'):
+                    job[key] = value.isoformat()
+        r.setex('getAllJobs',1800,json.dumps(jobs))
         return jsonify({"jobs": jobs}), 200
     except Exception as e:
+        print(str(e))
         return jsonify({"error": "An error occurred", "details": str(e)}), 500
 def getJobById(id):
     try:
+        cache_key = f"job:{id}"
+
+        # 1️⃣ Try fetching from Redis
+        job = r.get(cache_key)
+        if job:
+            # job is a JSON string → convert to dict
+            job = json.loads(job)
+            return jsonify({"job": job}), 200
+
+        # 2️⃣ Fetch from MongoDB
         job = mongo.db.jobs.find_one({"_id": ObjectId(id)})
         if not job:
             return jsonify({"message": "Job not found"}), 404
 
+        # 3️⃣ Convert ObjectId and datetime fields
         job["_id"] = str(job["_id"])
+        for key, value in job.items():
+            if hasattr(value, "isoformat"):  # datetime → string
+                job[key] = value.isoformat()
+
+        # 4️⃣ Cache in Redis for 5 minutes (300 seconds)
+        r.setex(cache_key, 1800, json.dumps(job))
+
         return jsonify({"job": job}), 200
+
     except Exception as e:
         return jsonify({"error": "An error occurred", "details": str(e)}), 500
 def updateJob(id,data):

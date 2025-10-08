@@ -18,64 +18,49 @@ const Interview = ({ userId }) => {
     }
   }, [userId]);
 
-  const fetchResumes = async () => {
-    if (!userId) {
-      setError("No user ID available.");
-      return;
-    }
+ const fetchResumes = async () => {
+  if (!userId) {
+    setError("No user ID available.");
+    return;
+  }
 
-    const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken) {
-      setError("User is not authenticated. Please login again.");
-      return;
-    }
+  const accessToken = localStorage.getItem("accessToken");
+  if (!accessToken) {
+    setError("User is not authenticated. Please login again.");
+    return;
+  }
 
-    setLoading(true);
-    setError("");
-    setResumes([]);
-    try {
-      const response = await axios.get(
-        `${config.backendUrl}/resume/get-resume-by-userId/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+  setLoading(true);
+  setError("");
+  setResumes([]);
 
-      if (response.data?.resumes?.length > 0) {
-        const resumesWithJob = await Promise.all(
-          response.data.resumes.map(async (resume) => {
-            if (resume.job_id) {
-              try {
-                const jobResponse = await axios.get(
-                  `${config.backendUrl}/jobs/job/${resume.job_id}`,
-                  {
-                    headers: {
-                      Authorization: `Bearer ${accessToken}`,
-                    },
-                  }
-                );
-                return { ...resume, job: jobResponse.data.job || null };
-              } catch (jobErr) {
-                console.error("Error fetching job:", jobErr);
-                return { ...resume, job: null };
-              }
-            } else {
-              return { ...resume, job: null };
-            }
-          })
-        );
-        setResumes(resumesWithJob);
-      } else {
-        setError("No resumes found for the given user ID.");
+  try {
+    // 1️⃣ Fetch resumes along with job data in a single request
+    const response = await axios.get(
+      `${config.backendUrl}/resume/get-resume-with-jobs/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       }
-    } catch (err) {
-      setError("Error fetching resumes: " + err.message);
-    } finally {
-      setLoading(false);
+    );
+
+    const resumes = response.data?.resumes || [];
+
+    if (resumes.length > 0) {
+      // No need to fetch jobs separately, they are already included
+      setResumes(resumes);
+    } else {
+      setError("No resumes found for the given user ID.");
     }
-  };  
+  } catch (err) {
+    console.error("Error fetching resumes with jobs:", err);
+    setError("Error fetching resumes: " + err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
   
   const startInterview = (resumeText, jobDescription) => {
     setSelectedInterview({ resumeText, jobDescription });

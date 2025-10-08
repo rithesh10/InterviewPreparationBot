@@ -25,7 +25,7 @@ const RegisterPage = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/user/register",
+        "http://127.0.0.1:5000/users/register",
         formData
       );
       console.log("Registration Success:", response.data);

@@ -9,7 +9,9 @@ from app.models.Resume_Model import ResumeSchema
 from datetime import datetime,timezone
 from db.db import mongo
 from bson import json_util, ObjectId
-
+from app.services.redis_service import r
+import json
+import time
 resume_schema=ResumeSchema()
 
 UPLOAD_FOLDER = "public/temp"
@@ -127,6 +129,14 @@ def get_by_jobId(id):
 
 def get_by_user_id(id):
     try:
+        cache_key=f"resumes:{id}"
+        cached_resumes=r.get(cache_key)
+        if cached_resumes:
+            cached_resumes=json.loads(cached_resumes)
+            return jsonify({
+                "message": "Fetched successfully (from cache)",
+                "resumes": cached_resumes
+            }), 200
         object_id=ObjectId(id)
         resumes=mongo.db.resume.find({"user_id":id})
         resume_list=list(resumes)
@@ -134,11 +144,16 @@ def get_by_user_id(id):
              return jsonify({"message": "No resumes found"}), 404
         for resume in resume_list:
             resume["_id"]=str(resume["_id"])
+            for key,value in resume.items():
+                if hasattr(value,"isoformat"):
+                    resume[key]=value.isoformat()
+        r.setex(cache_key,1800,json.dumps(resume_list))
         return jsonify({
             "message":"Fetched successfully",
             "resumes":resume_list
         }),200
     except Exception as e:
+        print(str(e))
         return jsonify({"message":"Internal server error","details":str(e)}),500
 def get_by_Id(id):
     try:
@@ -155,3 +170,72 @@ def get_by_Id(id):
         "message": "Fetched successfully",
         "resume": json_util.loads(json_util.dumps(resume)) 
     }), 200
+
+def get_resumes_with_jobs(user_id):
+    start_time = time.time()
+    try:
+        # 1️⃣ Cache key for resumes
+        resumes_cache_key = f"resumes:{user_id}"
+        cached_resumes = r.get(resumes_cache_key)
+        if cached_resumes:
+            resume_list = json.loads(cached_resumes)
+        else:
+            # Fetch resumes from MongoDB
+            resumes_cursor = mongo.db.resume.find({"user_id": user_id})
+            resume_list = list(resumes_cursor)
+            if not resume_list:
+                return jsonify({"message": "No resumes found"}), 404
+
+            # Convert ObjectId and datetime
+            for resume in resume_list:
+                resume["_id"] = str(resume["_id"])
+                for key, value in resume.items():
+                    if hasattr(value, "isoformat"):
+                        resume[key] = value.isoformat()
+
+            # Cache resumes for 30 min
+            r.setex(resumes_cache_key, 1800, json.dumps(resume_list))
+
+        # 2️⃣ Collect all job IDs
+        job_ids = list({resume.get("job_id") for resume in resume_list if resume.get("job_id")})
+        jobs_dict = {}
+
+        if job_ids:
+            # Prepare Redis keys
+            job_cache_keys = [f"job:{job_id}" for job_id in job_ids]
+            cached_jobs = r.mget(job_cache_keys)
+
+            missing_job_ids = []
+            for idx, cached_job in enumerate(cached_jobs):
+                job_id = job_ids[idx]
+                if cached_job:
+                    jobs_dict[job_id] = json.loads(cached_job)
+                else:
+                    missing_job_ids.append(job_id)
+
+            # Fetch missing jobs from MongoDB
+            if missing_job_ids:
+                mongo_jobs = list(
+                    mongo.db.jobs.find({"_id": {"$in": [ObjectId(j) for j in missing_job_ids]}})
+                )
+                for job in mongo_jobs:
+                    job["_id"] = str(job["_id"])
+                    for key, value in job.items():
+                        if hasattr(value, "isoformat"):
+                            job[key] = value.isoformat()
+                    # Cache in Redis
+                    r.setex(f"job:{job['_id']}", 1800, json.dumps(job))
+                    jobs_dict[job["_id"]] = job
+
+        # 3️⃣ Merge jobs into resumes
+        for resume in resume_list:
+            resume["job"] = jobs_dict.get(resume.get("job_id"))
+
+        end_time = time.time()  # end timer
+        print(f"Response time: {round((end_time - start_time)*1000, 2)} ms")
+        return jsonify({
+            "message": "Fetched successfully",
+            "resumes": resume_list
+        }), 200
+    except Exception as e:
+        return jsonify({"message": "Internal server error", "details": str(e)}), 500

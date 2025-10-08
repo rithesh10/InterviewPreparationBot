@@ -9,6 +9,7 @@ import json
 import asyncio
 from pymongo.errors import PyMongoError
 from app.Gemini.gemini import generate_prompt
+from app.services.redis_service import r
 def start_interview():
     """Start the interview process."""
     try:
@@ -268,11 +269,36 @@ def calculate_score(id):
         print(f"[FATAL ERROR] {str(e)}", flush=True)
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
-def get_calculated_score(id):
+def get_calculated_score(user_id):
     try:
-        calculate_score=mongo.db.interview_scores.find({"user_id":id})
-        if not calculate_score:
-            return jsonify({"message":"Score not found"}), 404
-        return jsonify({"interview_score":list(calculate_score)}),200
+        cache_key = f"interview_score:{user_id}"
+
+        # 1️⃣ Try fetching from Redis
+        cached_score = r.get(cache_key)
+        if cached_score:
+            interview_score = json.loads(cached_score)
+            return jsonify({"interview_score": interview_score}), 200
+
+        # 2️⃣ Fetch from MongoDB
+        scores_cursor = mongo.db.interview_scores.find({"user_id": user_id})
+        score_list = list(scores_cursor)
+
+        if not score_list:
+            return jsonify({"message": "Score not found"}), 404
+
+        # 3️⃣ Convert ObjectId and datetime for JSON serialization
+        for score in score_list:
+            score["_id"] = str(score["_id"])
+            for key, value in score.items():
+                if hasattr(value, "isoformat"):
+                    score[key] = value.isoformat()
+
+        # 4️⃣ Cache in Redis for 30 minutes
+        r.setex(cache_key, 1800, json.dumps(score_list))
+
+        return jsonify({"interview_score": score_list}), 200
+
     except Exception as e:
-        return json_util({"error":"Interval server error","details":str(e)}),500
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
+        
