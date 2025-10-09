@@ -1,324 +1,435 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
+/**
+ * Dashboard.jsx
+ *
+ * Requirements:
+ *  - TailwindCSS installed & configured
+ *  - lucide-react installed (npm i lucide-react)
+ *  - Add Inter/Roboto to index.html or import via CSS:
+ *
+ * Example index.html head entry:
+ * <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+ *
+ * Then ensure your tailwind config includes `fontFamily: { sans: ['Inter', 'ui-sans-serif', ...] }`
+ */
+
+import React, { useState } from "react";
 import {
-  User,
   Bell,
-  Briefcase,
-  FileText,
-  Search,
-  CheckCircle,
-  XCircle,
-  Clock,
+  Menu,
   ArrowRight,
-  Upload,
-  TrendingUp,
-  Award,
   PieChart,
   Compass,
   Target,
-} from 'lucide-react';
+  Upload,
+  Clipboard,
+  FileText,
+  User,
+} from "lucide-react";
 
-const mockJobApplications = [];
-const mockNotifications = [];
-const mockRecommendedJobs = [];
+/* -------------------------
+   Reusable UI Components
+   ------------------------- */
 
+const PRIMARY = "#4A90E2";
+const SECONDARY = "#F5F5F5";
+const ACCENT = "#FFA500";
+
+const IconWrapper = ({ children }) => (
+  <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-sm" style={{ background: "#fff" }}>
+    {children}
+  </div>
+);
+
+const Button = ({ children, variant = "primary", onClick, className = "" }) => {
+  if (variant === "primary") {
+    return (
+      <button
+        onClick={onClick}
+        className={`inline-flex items-center gap-2 px-5 py-3 rounded-full text-white font-semibold shadow-md transform hover:-translate-y-0.5 transition ${className}`}
+        style={{ background: PRIMARY }}
+      >
+        {children}
+      </button>
+    );
+  }
+  if (variant === "ghost") {
+    return (
+      <button
+        onClick={onClick}
+        className={`inline-flex items-center gap-2 px-5 py-3 rounded-full text-gray-800 bg-white border hover:bg-gray-50 transition ${className}`}
+      >
+        {children}
+      </button>
+    );
+  }
+  if (variant === "accent") {
+    return (
+      <button
+        onClick={onClick}
+        className={`inline-flex items-center gap-2 px-5 py-3 rounded-full text-white font-semibold shadow-md transform hover:-translate-y-0.5 transition ${className}`}
+        style={{ background: ACCENT }}
+      >
+        {children}
+      </button>
+    );
+  }
+  return null;
+};
+
+/* -------------------------
+   FeatureCard
+   ------------------------- */
+const FeatureCard = ({ icon, title, body, gradientFrom, gradientTo }) => {
+  return (
+    <div
+      className="p-6 rounded-2xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1"
+      style={{
+        background: `linear-gradient(135deg, ${gradientFrom}, ${gradientTo})`,
+        color: "#06213A",
+      }}
+    >
+      <div className="flex items-start gap-4">
+        <div className="bg-white/80 rounded-lg p-3 shadow-sm">
+          {icon}
+        </div>
+        <div>
+          <h4 className="font-semibold text-lg">{title}</h4>
+          <p className="mt-2 text-sm text-slate-700">{body}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* -------------------------
+   TimelineStep
+   ------------------------- */
+const TimelineStep = ({ number, title, subtitle, isLast }) => {
+  return (
+    <div className="flex flex-col items-center text-center relative">
+      {/* circle */}
+      <div className="z-10">
+        <div className="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center font-semibold text-indigo-700">
+          {number}
+        </div>
+      </div>
+      {/* box */}
+      <div className="mt-4 bg-white rounded-xl p-4 shadow-sm w-52">
+        <h5 className="font-semibold text-sm">{title}</h5>
+        <p className="text-xs text-slate-500 mt-1">{subtitle}</p>
+      </div>
+
+      {/* connector line (desktop) */}
+      {!isLast && (
+        <div className="hidden lg:block absolute top-6 right-[-50%] w-[100%] h-0.5 bg-indigo-200 -z-0"></div>
+      )}
+    </div>
+  );
+};
+
+/* -------------------------
+   TestimonialCard
+   ------------------------- */
+const TestimonialCard = ({ person }) => {
+  return (
+    <div className="p-6 rounded-2xl backdrop-blur-md bg-white/30 shadow-lg border border-white/20">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-indigo-700 font-bold">
+          {person.initials}
+        </div>
+        <div>
+          <div className="font-semibold">{person.name}</div>
+          <div className="text-xs text-slate-100">{person.role}</div>
+        </div>
+      </div>
+      <p className="text-sm text-white/90">“{person.quote}”</p>
+    </div>
+  );
+};
+
+/* -------------------------
+   DATA (placeholder)
+   ------------------------- */
+const metrics = {
+  readiness: 78,
+  topSkills: ["React", "Node.js", "Data Structures"],
+  growth: "12% MoM",
+};
+
+const testimonials = [
+  {
+    name: "Sarah Johnson",
+    role: "Computer Science Student",
+    initials: "SJ",
+    quote:
+      "The platform helped me identify strengths I didn't know I had — landed an internship within weeks.",
+  },
+  {
+    name: "Michael Chen",
+    role: "Business Graduate",
+    initials: "MC",
+    quote:
+      "Career mapping opened new, exciting paths I hadn't considered.",
+  },
+  {
+    name: "Priya Patel",
+    role: "Engineering Professional",
+    initials: "PP",
+    quote:
+      "Focused recommendations helped me upskill and get promoted.",
+  },
+];
+
+/* -------------------------
+   Main Dashboard
+   ------------------------- */
 const UserDashboard = () => {
-  const { user } = useAuth();
-  const [jobApplications, setJobApplications] = useState(mockJobApplications);
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const [recommendedJobs, setRecommendedJobs] = useState(mockRecommendedJobs);
-
-  const [resumeName, setResumeName] = useState('');
-  const [activeSection, setActiveSection] = useState('home');
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'Applied': return <Clock className="text-yellow-500" />;
-      case 'Interview': return <CheckCircle className="text-green-500" />;
-      case 'Rejected': return <XCircle className="text-red-500" />;
-      default: return null;
-    }
-  };
-
-  const markNotificationAsRead = (id) => {
-    setNotifications(notifications.map(notif =>
-      notif.id === id ? { ...notif, read: true } : notif
-    ));
-  };
-
-  const handleFileChange = (e) => {
-    if (e.target.files.length > 0) {
-      setResumeName(e.target.files[0].name);
-    }
-  };
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // placeholder user
+  const user = { name: "Alex Turner", role: "Product Manager" };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
-              <span className="block">Discover Your</span>
-              <span className="block text-indigo-600">Professional Potential</span>
-            </h1>
-            <p className="text-xl text-gray-600">
-              Our AI-powered assessment platform helps you understand where you stand in the job market and what steps to take next in your career journey.
-            </p>
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <Link to="/user/three-steps" className="flex items-center">  
-                <button className="px-8 py-4 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center">
-                  Get Started <ArrowRight className="ml-2" size={18} />
-                </button>
-              </Link>
-              <button className="px-8 py-4 rounded-md border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center justify-center">
-                Learn More
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f7fbff_0%,_#eef6ff_100%)] font-sans text-slate-800">
+      {/* --------- Header / Navbar ---------- */}
+      <header className="fixed w-full top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between py-3">
+            <div className="flex items-center gap-4">
+              <div className="text-xl font-extrabold flex items-center gap-2">
+                <div
+                  className="w-9 h-9 rounded-md flex items-center justify-center text-white shadow"
+                  style={{ background: PRIMARY }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 12h18" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M3 6h18" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <span style={{ color: PRIMARY }}>SkillUp</span>
+              </div>
+            </div>
+
+            <nav className="hidden md:flex items-center gap-4">
+              <a className="text-sm font-medium hover:text-slate-600" href="#features">Features</a>
+              <a className="text-sm font-medium hover:text-slate-600" href="#how">How it Works</a>
+              <a className="text-sm font-medium hover:text-slate-600" href="#testimonials">Testimonials</a>
+            </nav>
+
+            <div className="flex items-center gap-3">
+              <button
+                className="p-2 rounded-full hover:bg-white/60 transition relative"
+                aria-label="notifications"
+              >
+                <Bell size={18} />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 border border-white" />
+              </button>
+
+              <div className="hidden md:flex items-center gap-3 bg-white rounded-full px-3 py-1 shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-slate-700">
+                  {user.name.split(" ").map(n => n[0]).slice(0,2).join("")}
+                </div>
+                <div className="text-sm">
+                  <div className="font-medium">{user.name}</div>
+                  <div className="text-xs text-slate-500">{user.role}</div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setMobileMenuOpen(p => !p)}
+                className="ml-1 md:hidden p-2 rounded-md bg-white shadow"
+                aria-label="menu"
+              >
+                <Menu size={18} />
               </button>
             </div>
           </div>
-          <div className="hidden lg:block relative h-96">
-            <div className="absolute inset-0 bg-indigo-100 rounded-xl overflow-hidden">
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-indigo-500 rounded-full opacity-20"></div>
-              <div className="absolute top-1/4 right-1/4 w-48 h-48 bg-blue-400 rounded-full opacity-20"></div>
-              <div className="absolute bottom-1/4 left-1/4 w-40 h-40 bg-purple-400 rounded-full opacity-20"></div>
 
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-xl w-64">
-                <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-4">
-                  <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" style={{ width: '75%' }}></div>
-                </div>
-                <div className="text-center text-gray-800 font-medium">Career Readiness: 75%</div>
-              </div>
-
-              <div className="absolute top-1/4 right-1/3 bg-white p-4 rounded-lg shadow-lg">
-                <Award className="text-indigo-500" size={24} />
-                <span className="text-sm font-medium">Top 10% skills</span>
-              </div>
-
-              <div className="absolute bottom-1/4 left-1/3 bg-white p-4 rounded-lg shadow-lg">
-                <TrendingUp className="text-green-500" size={24} />
-                <span className="text-sm font-medium">Growing fast</span>
-              </div>
+          {/* Mobile menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden bg-white rounded-xl shadow p-3">
+              <a className="block py-2 px-2 rounded hover:bg-gray-50" href="#features">Features</a>
+              <a className="block py-2 px-2 rounded hover:bg-gray-50" href="#how">How It Works</a>
+              <a className="block py-2 px-2 rounded hover:bg-gray-50" href="#testimonials">Testimonials</a>
             </div>
-          </div>
+          )}
         </div>
-      </div>
+      </header>
 
-      <div className="bg-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-              Get to Know Yourself Better
-            </h2>
-            <p className="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
-              Our comprehensive assessment tools provide personalized insights to help you make informed career decisions.
-            </p>
-          </div>
+      {/* ---------- Page content ---------- */}
+      <main className="pt-28">
+        {/* ---------- Hero ---------- */}
+        <section className="px-4">
+          <div className="max-w-4xl mx-auto rounded-2xl p-8 md:p-12 bg-white shadow-xl relative overflow-hidden">
+            {/* decorative blobs */}
+            <div className="absolute -right-20 -top-20 w-56 h-56 rounded-full opacity-20" style={{ background: PRIMARY }} />
+            <div className="absolute -left-16 -bottom-16 w-40 h-40 rounded-full opacity-20" style={{ background: ACCENT }} />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
-                <PieChart className="text-indigo-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Skill Analysis</h3>
-              <p className="text-gray-600">
-                Discover your strengths and areas for improvement with our detailed skill assessment reports.
+            <div className="text-center">
+              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">
+                Discover Your <span style={{ color: PRIMARY }}>Professional Potential</span>
+              </h1>
+              <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
+                AI-powered applicant tracking and career assessment tools to help you find, evaluate, and hire talent faster — or to discover your own career roadmap.
               </p>
-            </div>
 
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                <Compass className="text-purple-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Career Path Mapping</h3>
-              <p className="text-gray-600">
-                Explore potential career paths based on your unique profile and market demands.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <Target className="text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Personalized Goals</h3>
-              <p className="text-gray-600">
-                Set achievable milestones and track your progress with customized development plans.
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-              How It Works
-            </h2>
-            <p className="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
-              Our simple four-step process helps you understand where you stand and how to improve.
-            </p>
-          </div>
-
-          <div className="relative">
-            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-indigo-200 transform -translate-y-1/2"></div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-              <div className="relative">
-                <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
-                  1
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm mt-8">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Upload Resume</h3>
-                  <p className="text-gray-600">Submit your resume for our AI to analyze your background and skills.</p>
-                </div>
+              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center items-center">
+                <Button variant="primary">
+                  Get Started <ArrowRight size={16} />
+                </Button>
+                <Button variant="ghost">Learn More</Button>
               </div>
 
-              <div className="relative">
-                <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
-                  2
+              {/* feature badges */}
+              <div className="mt-6 flex flex-wrap justify-center gap-3 items-center">
+                <div className="px-4 py-2 rounded-full bg-white shadow flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-md flex items-center justify-center" style={{ background: PRIMARY }}>
+                    <PieChart size={18} color="white" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500">Readiness</div>
+                    <div className="font-semibold"> {metrics.readiness}%</div>
+                  </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm mt-8">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Complete Assessment</h3>
-                  <p className="text-gray-600">Take our targeted assessment designed to evaluate your job-specific skills.</p>
-                </div>
-              </div>
 
-              <div className="relative">
-                <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
-                  3
+                <div className="px-4 py-2 rounded-full bg-white shadow flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-md flex items-center justify-center" style={{ background: ACCENT }}>
+                    <Compass size={18} color="white" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500">Top Skills</div>
+                    <div className="font-semibold">{metrics.topSkills.join(", ")}</div>
+                  </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm mt-8">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Receive Report Card</h3>
-                  <p className="text-gray-600">Get comprehensive insights into your strengths and areas for growth.</p>
-                </div>
-              </div>
 
-              <div className="relative">
-                <div className="lg:absolute lg:top-0 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:-translate-y-1/2 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold mb-4 lg:mb-0">
-                  4
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm mt-8">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Take Action</h3>
-                  <p className="text-gray-600">Follow our personalized recommendations to boost your career prospects.</p>
+                <div className="px-4 py-2 rounded-full bg-white shadow flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-md flex items-center justify-center" style={{ background: "#34D399" }}>
+                    <Target size={18} color="white" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500">Growth</div>
+                    <div className="font-semibold">{metrics.growth}</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <div className="py-16 bg-indigo-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-              What Our Users Say
-            </h2>
-            <p className="mt-4 text-xl text-indigo-100 max-w-2xl mx-auto">
-              Discover how our platform has helped students and professionals alike.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                <div className="ml-4">
-                  <h4 className="font-bold">Sarah Johnson</h4>
-                  <p className="text-sm text-gray-600">Computer Science Student</p>
-                </div>
-              </div>
-              <p className="text-gray-700">
-                "The assessment highlighted skills I didn't even know I had! It helped me focus my job search and land an internship at my dream tech company."
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                <div className="ml-4">
-                  <h4 className="font-bold">Michael Chen</h4>
-                  <p className="text-sm text-gray-600">Business Graduate</p>
-                </div>
-              </div>
-              <p className="text-gray-700">
-                "The career path mapping was eye-opening. I discovered alternatives I hadn't considered that better matched my strengths and interests."
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                <div className="ml-4">
-                  <h4 className="font-bold">Priya Patel</h4>
-                  <p className="text-sm text-gray-600">Engineering Professional</p>
-                </div>
-              </div>
-              <p className="text-gray-700">
-                "After 5 years in my field, I was feeling stuck. This platform helped me identify skill gaps and create a development plan that led to a promotion."
-              </p>
+        {/* ---------- Feature Cards ---------- */}
+        <section id="features" className="mt-12 px-4">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6 text-center">Platform Highlights</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <FeatureCard
+                icon={<PieChart size={20} color="#4A90E2" />}
+                title="Skill Analysis"
+                body="Discover candidate strengths and gaps with our deep-skill analysis and scoring."
+                gradientFrom="#E6F0FF"
+                gradientTo="#DCEEFF"
+              />
+              <FeatureCard
+                icon={<Compass size={20} color="#7C3AED" />}
+                title="Career Path Mapping"
+                body="Map candidates to ideal roles & career progression with AI-driven recommendations."
+                gradientFrom="#FCF7E6"
+                gradientTo="#FFF4E0"
+              />
+              <FeatureCard
+                icon={<Target size={20} color="#2563EB" />}
+                title="Personalized Goals"
+                body="Create role-specific milestones and track candidate progress through assessments."
+                gradientFrom="#E6FAF1"
+                gradientTo="#DFF7EE"
+              />
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <div className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl mb-6">
-            Ready to Discover Your Potential?
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Join thousands of students and professionals who have transformed their careers with our assessment platform.
-          </p>
-          <div className="inline-flex rounded-md shadow">
-          <Link to="/user/three-steps" className="flex items-center">
-            <button className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-              Get Started For Free
-            </button>
-            </Link>
+        {/* ---------- Timeline / Steps ---------- */}
+        <section id="how" className="mt-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-2xl font-bold mb-8 text-center">How it Works</h2>
+
+            {/* Vertical on mobile, horizontal on desktop */}
+            <div className="relative">
+              {/* connecting line for desktop */}
+              <div className="hidden lg:block absolute left-0 right-0 top-10 h-1 bg-indigo-100"></div>
+
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+                <TimelineStep number={1} title="Upload Resume" subtitle="Submit candidate's resume for parsing." />
+                <TimelineStep number={2} title="Take Assessment" subtitle="Assess skills, aptitude & culture fit." />
+                <TimelineStep number={3} title="Get Report" subtitle="Comprehensive scorecards & insights." />
+                <TimelineStep number={4} title="Take Action" subtitle="Interview, hire, or provide learning paths." isLast />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        {/* ---------- Testimonials ---------- */}
+        <section id="testimonials" className="mt-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6 text-center text-slate-800">What Our Users Say</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {testimonials.map((t, idx) => (
+                <TestimonialCard key={idx} person={t} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- CTA ---------- */}
+        <section className="mt-16 px-4">
+          <div className="max-w-4xl mx-auto bg-white rounded-2xl p-10 text-center shadow-xl">
+            <h3 className="text-2xl font-bold">Ready to discover the best talent — or your next role?</h3>
+            <p className="mt-3 text-slate-600">Start free. Upgrade later for advanced applicant insights and team collaboration.</p>
+            <div className="mt-6 flex justify-center gap-4">
+              <Button variant="primary">Get Started</Button>
+              <Button variant="ghost">Book a demo</Button>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- Footer ---------- */}
+        <footer className="mt-20 bg-slate-900 text-white">
+          <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">CareerCompass</h3>
-              <p className="text-gray-400">
-                Guiding your professional journey with data-driven insights.
-              </p>
+              <div className="text-xl font-bold" style={{ color: PRIMARY }}>SkillUp</div>
+              <p className="mt-3 text-sm text-slate-300">Guiding hiring and careers with data-driven insights.</p>
             </div>
+
             <div>
-              <h3 className="font-bold mb-4">Resources</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Guides</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Webinars</a></li>
+              <h4 className="font-semibold mb-3">Resources</h4>
+              <ul className="text-sm text-slate-400 space-y-2">
+                <li><a href="#" className="hover:text-white">Blog</a></li>
+                <li><a href="#" className="hover:text-white">Guides</a></li>
+                <li><a href="#" className="hover:text-white">Webinars</a></li>
               </ul>
             </div>
+
             <div>
-              <h3 className="font-bold mb-4">Company</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+              <h4 className="font-semibold mb-3">Company</h4>
+              <ul className="text-sm text-slate-400 space-y-2">
+                <li><a href="#" className="hover:text-white">About</a></li>
+                <li><a href="#" className="hover:text-white">Careers</a></li>
+                <li><a href="#" className="hover:text-white">Contact</a></li>
               </ul>
             </div>
+
             <div>
-              <h3 className="font-bold mb-4">Legal</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
+              <h4 className="font-semibold mb-3">Legal</h4>
+              <ul className="text-sm text-slate-400 space-y-2">
+                <li><a href="#" className="hover:text-white">Privacy</a></li>
+                <li><a href="#" className="hover:text-white">Terms</a></li>
+                <li><a href="#" className="hover:text-white">Cookies</a></li>
               </ul>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} CareerCompass. All rights reserved.</p>
+
+          <div className="border-t border-slate-800 py-6 text-center text-slate-400 text-sm">
+            © {new Date().getFullYear()} SkillUp — All rights reserved.
           </div>
-        </div>
-      </footer>
+        </footer>
+      </main>
     </div>
   );
 };
