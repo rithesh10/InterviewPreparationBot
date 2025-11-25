@@ -104,6 +104,7 @@ def upload_resume():
 
         return jsonify({
             "message": "Resume uploaded successfully",
+            "resume_id": str(resume.inserted_id)
             # "resume": resume
         }), 201
 

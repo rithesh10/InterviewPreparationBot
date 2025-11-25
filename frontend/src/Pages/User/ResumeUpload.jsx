@@ -8,6 +8,8 @@ const ResumeUpload = ({ job, onBack }) => {
   const [experience, setExperience] = useState("");
   const [skills, setSkills] = useState([]);
   const [skillInput, setSkillInput] = useState("");
+  const [atsScore, setAtsScore] = useState(null);
+  const [isRanking, setIsRanking] = useState(false);
 
   const handleResumeUpload = (event) => setResume(event.target.files[0]);
 
@@ -48,6 +50,29 @@ const handleJobApplication = async () => {
 
     alert("Application submitted successfully");
     console.log("Application submitted successfully:", response.data);
+
+    if (response.data.resume_id) {
+        setIsRanking(true);
+        try {
+            const rankResponse = await axios.post(
+                `${config.backendUrl}/ranking/rank-resume/${response.data.resume_id}`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            console.log("Ranking response:", rankResponse.data);
+            setAtsScore(rankResponse.data.ai_score);
+        } catch (rankError) {
+            console.error("Error ranking resume:", rankError);
+            alert("Resume uploaded, but failed to generate ATS score.");
+        } finally {
+            setIsRanking(false);
+        }
+    }
+
   } catch (error) {
     console.error("Error submitting application:", error);
     alert("Failed to submit application. Please try again.");
@@ -59,6 +84,13 @@ const handleJobApplication = async () => {
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
       <div className="w-full sm:w-96 bg-white p-8 rounded-lg shadow-xl space-y-6">
         <h2 className="text-3xl font-semibold text-center text-blue-600">Apply for Job</h2>
+
+        {atsScore !== null && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                <h3 className="text-lg font-medium text-blue-800">ATS Score</h3>
+                <p className="text-4xl font-bold text-blue-600 mt-2">{atsScore}/100</p>
+            </div>
+        )}
 
         <div>
           <label className="block text-lg font-medium text-gray-700">Experience (years)</label>
@@ -108,9 +140,12 @@ const handleJobApplication = async () => {
         {resume && (
           <button
             onClick={handleJobApplication}
-            className="mt-4 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+            disabled={isRanking}
+            className={`mt-4 w-full px-6 py-3 rounded-lg text-white transition ${
+                isRanking ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+            }`}
           >
-            Submit Application
+            {isRanking ? "Analyzing Resume..." : "Submit Application"}
           </button>
         )}
 

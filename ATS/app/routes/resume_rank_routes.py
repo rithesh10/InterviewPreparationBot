@@ -13,6 +13,11 @@ resume_ranking_bp = Blueprint("ranking", __name__)
 def secure_add_resume_ranking(id):
     return add_resume_ranking_by_ResumeId(id)
 
+@resume_ranking_bp.route("/rank-resume/<id>", methods=["POST"])
+# @verify_jwt()
+def secure_rank_resume(id):
+    return add_resume_ranking_by_ResumeId(id)
+
 @resume_ranking_bp.route("/resume-rankings/<id>", methods=["GET"])
 # @verify_jwt()
 def secure_get_resume_ranking(id):
@@ -42,6 +47,7 @@ def secure_get_top_n_resumes(n):
 # @verify_jwt()
 def secure_get_resumes_by_matching_skills():
     return get_resumes_by_matching_skills()
+
 @resume_ranking_bp.route("/rank-job/<job_id>",methods=["GET"])
 def secure_get_resume_by_matching_jobID(job_id):
     return add_resume_ranking_for_job(job_id)

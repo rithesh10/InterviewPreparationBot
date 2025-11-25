@@ -100,7 +100,11 @@ def add_resume_ranking_by_ResumeId(id):
             print("Database Insert Error:", str(db_error))
             return jsonify({"error": "Failed to save ranking to database"}), 500
 
-        return jsonify({"inserted_id": str(resume_score_data.inserted_id)}), 201
+        return jsonify({
+            "inserted_id": str(resume_score_data.inserted_id),
+            "ai_score": round(ai_score, 1),
+            "matching_skills": matching_skills
+        }), 201
 
     except Exception as e:
         print("Error:", str(e))
