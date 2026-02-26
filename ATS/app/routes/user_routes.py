@@ -1,5 +1,5 @@
 from flask import Blueprint, request,jsonify
-from ..controllers.user_controller import login_user, update_profile,register_user,get_user,get_all_users ,update_user,delete_user
+from ..controllers.user_controller import login_user, update_profile,register_user,get_user,get_all_users ,update_user,delete_user,refresh_access_token
 from app.middleware.auth_middleware import verify_jwt
 from app.utils.ApiError import ApiError
 user_bp = Blueprint("users", __name__)
@@ -27,6 +27,11 @@ def register():
 def login():
     data=request.get_json()
     return login_user(data)
+
+@user_bp.route("/refresh-token", methods=["POST"])
+def refresh_token():
+    data = request.get_json()
+    return refresh_access_token(data)
 
 @user_bp.route("/<id>",methods=["GET"])
 @verify_jwt

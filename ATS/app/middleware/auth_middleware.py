@@ -21,13 +21,17 @@ def verify_jwt(f):
     def decorated_function(*args, **kwargs):
         token = get_bearer_token()
         if not token:
-            raise ApiError(401, "Unauthorized request. No Bearer token found.")
+            raise ApiError(
+                401,
+                "Unauthorized request. No Bearer token found.",
+                data={"code": "TOKEN_MISSING"},
+            )
 
         try:
             decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             user_id = decoded.get("_id") or decoded.get("user_id")  # Depending on your token payload key
             if not user_id:
-                raise ApiError(401, "Invalid token payload")
+                raise ApiError(401, "Invalid token payload", data={"code": "TOKEN_INVALID"})
 
             user = mongo.db.users.find_one({"_id": ObjectId(user_id)}, {"password": 0, "refresh_token": 0})
             if not user:
@@ -40,9 +44,11 @@ def verify_jwt(f):
             return f(*args, **kwargs)
 
         except jwt.ExpiredSignatureError:
-            raise ApiError(401, "Token has expired")
+            raise ApiError(401, "Token has expired", data={"code": "TOKEN_EXPIRED"})
         except jwt.InvalidTokenError:
-            raise ApiError(401, "Invalid token")
+            raise ApiError(401, "Invalid token", data={"code": "TOKEN_INVALID"})
+        except ApiError:
+            raise
         except Exception as e:
             raise ApiError(500, f"Internal server error: {str(e)}")
 

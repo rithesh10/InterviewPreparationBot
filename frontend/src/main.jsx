@@ -5,6 +5,10 @@ import './index.css'
 import App from './App.jsx'
 import {BrowserRouter} from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { setupAxiosInterceptors } from './api/setupAxiosInterceptors.js'
+
+setupAxiosInterceptors()
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>

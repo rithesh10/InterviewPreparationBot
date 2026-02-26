@@ -142,6 +142,68 @@ def login_user(data):
         traceback.print_exc()
         return jsonify({"error": "An error occurred", "details": str(e)}), 500
 
+def refresh_access_token(data):
+    """Issue a new access token (and rotated refresh token) using refresh token."""
+    try:
+        incoming_refresh_token = (data or {}).get("refreshToken")
+        if not incoming_refresh_token:
+            return jsonify({
+                "message": "Refresh token is required",
+                "data": {"code": "REFRESH_TOKEN_MISSING"}
+            }), 401
+
+        try:
+            decoded = jwt.decode(
+                incoming_refresh_token,
+                os.getenv("REFRESH_TOKEN_SECRET"),
+                algorithms=["HS256"]
+            )
+        except jwt.ExpiredSignatureError:
+            return jsonify({
+                "message": "Refresh token has expired",
+                "data": {"code": "REFRESH_TOKEN_EXPIRED"}
+            }), 401
+        except jwt.InvalidTokenError:
+            return jsonify({
+                "message": "Invalid refresh token",
+                "data": {"code": "REFRESH_TOKEN_INVALID"}
+            }), 401
+
+        user_id = decoded.get("user_id")
+        if not user_id or not ObjectId.is_valid(user_id):
+            return jsonify({
+                "message": "Invalid refresh token payload",
+                "data": {"code": "REFRESH_TOKEN_INVALID"}
+            }), 401
+
+        user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return jsonify({
+                "message": "User not found",
+                "data": {"code": "REFRESH_TOKEN_INVALID"}
+            }), 401
+
+        stored_refresh_token = user.get("refresh_token")
+        if not stored_refresh_token or stored_refresh_token != incoming_refresh_token:
+            return jsonify({
+                "message": "Refresh token mismatch",
+                "data": {"code": "REFRESH_TOKEN_REVOKED"}
+            }), 401
+
+        new_access_token, new_refresh_token = generate_access_refresh_token(str(user["_id"]))
+        if not new_access_token or not new_refresh_token:
+            return jsonify({"error": "Token generation failed"}), 500
+
+        return jsonify({
+            "message": "Token refreshed successfully",
+            "accessToken": new_access_token,
+            "refreshToken": new_refresh_token
+        }), 200
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": "An error occurred", "details": str(e)}), 500
+
 def get_user(id):
     """Get user details by ID"""
     try:

@@ -1,7 +1,9 @@
 from flask import Flask
+from flask import jsonify
 from .config import Config
 from db.db import init_mongo, mongo
 from flask_cors import CORS
+from app.utils.ApiError import ApiError
 
 def create_app():
     app = Flask(__name__)
@@ -24,5 +26,11 @@ def create_app():
     app.register_blueprint(resume_bp, url_prefix="/resume")
     app.register_blueprint(gemini_bp,url_prefix="/gemini")
     app.register_blueprint(matcher_bp,url_prefix="/matcher")
+
+    @app.errorhandler(ApiError)
+    def handle_api_error(error):
+        response = jsonify(error.to_dict())
+        response.status_code = error.status_code
+        return response
 
     return app
