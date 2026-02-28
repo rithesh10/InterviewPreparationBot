@@ -3,8 +3,9 @@ import config from "../../config/config";
 import axios from "axios";
 import VoiceInput from "./VoiceInput";
 import ReactMarkdown from "react-markdown";
+import CameraPreview from "./CameraPreview";
 
-const Test = ({ resumeText, jobDescription, onBack, userId }) => {
+const Test = ({ resumeText, jobDescription, onBack }) => {
   const [currentAnswer, setCurrentAnswer] = useState("");
   const [question, setQuestion] = useState("");
   const [interviewId, setInterviewId] = useState(null);
@@ -50,10 +51,6 @@ const Test = ({ resumeText, jobDescription, onBack, userId }) => {
 
   const handleAnswerChange = (e) => {
     setCurrentAnswer(e.target.value);
-  };
-
-  const handleVoiceInput = (text) => {
-    setCurrentAnswer((prev) => (prev ? prev + " " + text : text));
   };
 
   const handleSubmitAnswer = async () => {
@@ -135,7 +132,7 @@ const Test = ({ resumeText, jobDescription, onBack, userId }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-[96rem] mx-auto mt-6 p-4 md:p-6 bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">
         Interview Simulation
       </h1>
@@ -154,23 +151,31 @@ const Test = ({ resumeText, jobDescription, onBack, userId }) => {
 
       {!isCompleted ? (
         <>
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h2 className="text-lg font-semibold mb-2">Question:</h2>
-            <p className="text-gray-800">
-              <ReactMarkdown>{question}</ReactMarkdown>
-            </p>
-          </div>
+          <div className="mb-6 grid grid-cols-1 xl:grid-cols-12 gap-5">
+            <div className="xl:col-span-8">
+              <CameraPreview
+                overlayText={question}
+                overlayControls={<VoiceInput setCurrentAnswer={setCurrentAnswer} compact />}
+              />
+            </div>
 
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Your Answer:</h2>
-            <textarea
-              value={currentAnswer}
-              onChange={handleAnswerChange}
-              rows="6"
-              className="p-3 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
-              placeholder="Type your answer here or use voice input..."
-            />
-            <VoiceInput setCurrentAnswer={setCurrentAnswer} />
+            <div className="xl:col-span-4 border border-gray-200 rounded-xl p-4 bg-gray-50">
+              <h2 className="text-lg font-semibold mb-3">Question (Readable View)</h2>
+              <div className="mb-4 p-3 bg-white border border-gray-200 rounded-md max-h-44 overflow-y-auto">
+                <p className="text-gray-800 text-sm leading-relaxed">
+                  <ReactMarkdown>{question}</ReactMarkdown>
+                </p>
+              </div>
+
+              <h2 className="text-lg font-semibold mb-2">Type Your Answer</h2>
+              <textarea
+                value={currentAnswer}
+                onChange={handleAnswerChange}
+                rows="12"
+                className="p-3 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                placeholder="Type your answer here or use voice input..."
+              />
+            </div>
           </div>
 
           <div className="flex justify-end">

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase, Plus, Trash2, Users, Eye, X, CheckCircle, Clock, XCircle, FileText, Mail, Phone, Calendar, Loader } from 'lucide-react';
+import { Briefcase, Users, X, CheckCircle, Clock, XCircle, FileText, Mail, Phone, Calendar, Loader } from 'lucide-react';
 import axios from 'axios';
 import config from '../../config/config';
-import { replace } from 'react-router-dom';
 import JobList from './JobList'
 import JobForm from './JobForm';
 // ================= ALERT COMPONENTS =================
@@ -269,7 +268,7 @@ const AdminDashboard = () => {
       const response = await axios.get(`${config.backendUrl}/jobs/jobs`, { headers: { Authorization: `Bearer ${accessToken}` } });
       setJobs(response.data.jobs || []);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to fetch job listings. Please try again.');
     } finally { setIsLoadingJobs(false); }
   };
@@ -282,7 +281,7 @@ const AdminDashboard = () => {
       setResumes(response.data.resumes || []);
       console.log(resumes)
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to fetch resumes. Please try again.');
     } finally { setIsLoadingResumes(false); }
   };
@@ -291,11 +290,11 @@ const AdminDashboard = () => {
     if(!window.confirm('Are you sure you want to delete this job listing?')) return;
     try {
       const accessToken = localStorage.getItem("accessToken");
-      await axios.delete(`${config.backendUrl}/jobs/delete/${jobId}`, { headers: { Authorization: `Bearer ${accessToken}` } });
+      await axios.delete(`${config.backendUrl}/jobs/jobs/${jobId}`, { headers: { Authorization: `Bearer ${accessToken}` } });
       setSuccess('Job listing deleted successfully!');
       fetchJobs();
       if(selectedJob?.id === jobId){ setSelectedJob(null); setResumes([]); }
-    } catch(err) { setError('Failed to delete job listing. Please try again.'); }
+    } catch { setError('Failed to delete job listing. Please try again.'); }
   };
 
   return (

@@ -27,7 +27,7 @@ const ResumeDetail = () => {
       });
 
       setResume(response.data.resume);
-    } catch (err) {
+    } catch {
       setError("Failed to load resume details.");
     }
   };
@@ -60,7 +60,7 @@ const ResumeDetail = () => {
       );
 
       setRanking(detailsRes.data);
-    } catch (err) {
+    } catch {
       setError("Failed to load AI ranking.");
     } finally {
       setLoadingRanking(false);

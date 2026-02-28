@@ -92,12 +92,6 @@ const handleSubmit = async (event) => {
     if (fileInput) fileInput.value = '';
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 80) return 'text-emerald-600';
-    if (score >= 60) return 'text-amber-600';
-    return 'text-red-500';
-  };
-
   const getScoreBgColor = (score) => {
     if (score >= 80) return 'bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200';
     if (score >= 60) return 'bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200';

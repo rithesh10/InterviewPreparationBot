@@ -1,6 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { CircleCheck, Book, Play, Video, PenSquare, MessageSquare, User } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function TopicsList() {
 	const navigate = useNavigate();

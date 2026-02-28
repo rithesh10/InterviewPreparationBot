@@ -9,7 +9,7 @@ from app.models.Resume_Model import ResumeSchema
 from datetime import datetime,timezone
 from db.db import mongo
 from bson import json_util, ObjectId
-from app.services.redis_service import r
+from app.services.redis_service import safe_get, safe_mget, safe_setex
 import json
 import time
 resume_schema=ResumeSchema()
@@ -131,7 +131,7 @@ def get_by_jobId(id):
 def get_by_user_id(id):
     try:
         cache_key=f"resumes:{id}"
-        cached_resumes=r.get(cache_key)
+        cached_resumes = safe_get(cache_key)
         if cached_resumes:
             cached_resumes=json.loads(cached_resumes)
             return jsonify({
@@ -148,7 +148,7 @@ def get_by_user_id(id):
             for key,value in resume.items():
                 if hasattr(value,"isoformat"):
                     resume[key]=value.isoformat()
-        r.setex(cache_key,1800,json.dumps(resume_list))
+        safe_setex(cache_key, 1800, json.dumps(resume_list))
         return jsonify({
             "message":"Fetched successfully",
             "resumes":resume_list
@@ -177,7 +177,7 @@ def get_resumes_with_jobs(user_id):
     try:
         # 1️⃣ Cache key for resumes
         resumes_cache_key = f"resumes:{user_id}"
-        cached_resumes = r.get(resumes_cache_key)
+        cached_resumes = safe_get(resumes_cache_key)
         if cached_resumes:
             resume_list = json.loads(cached_resumes)
         else:
@@ -195,7 +195,7 @@ def get_resumes_with_jobs(user_id):
                         resume[key] = value.isoformat()
 
             # Cache resumes for 30 min
-            r.setex(resumes_cache_key, 1800, json.dumps(resume_list))
+            safe_setex(resumes_cache_key, 1800, json.dumps(resume_list))
 
         # 2️⃣ Collect all job IDs
         job_ids = list({resume.get("job_id") for resume in resume_list if resume.get("job_id")})
@@ -204,7 +204,7 @@ def get_resumes_with_jobs(user_id):
         if job_ids:
             # Prepare Redis keys
             job_cache_keys = [f"job:{job_id}" for job_id in job_ids]
-            cached_jobs = r.mget(job_cache_keys)
+            cached_jobs = safe_mget(job_cache_keys)
 
             missing_job_ids = []
             for idx, cached_job in enumerate(cached_jobs):
@@ -225,7 +225,7 @@ def get_resumes_with_jobs(user_id):
                         if hasattr(value, "isoformat"):
                             job[key] = value.isoformat()
                     # Cache in Redis
-                    r.setex(f"job:{job['_id']}", 1800, json.dumps(job))
+                    safe_setex(f"job:{job['_id']}", 1800, json.dumps(job))
                     jobs_dict[job["_id"]] = job
 
         # 3️⃣ Merge jobs into resumes

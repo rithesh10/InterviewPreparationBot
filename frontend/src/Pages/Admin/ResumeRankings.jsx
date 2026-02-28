@@ -12,7 +12,7 @@ const ResumeRankings = () => {
     const [skills, setSkills] = useState("");
     const [newRanking, setNewRanking] = useState({ resume_id: "", job_id });
     const [topN, setTopN] = useState(5);
-    const [isLoading, setIsLoading] = useState(false);
+    const [_isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("rankings");
 
     useEffect(() => {
@@ -60,7 +60,7 @@ const ResumeRankings = () => {
     
     const deleteRanking = async (id) => {
         try {
-            await axios.delete(`${config.backendUrl}/resume/resume-rankings/${id}`);
+            await axios.delete(`${config.backendUrl}/ranking/resume-rankings/${id}`);
             fetchRankings(); 
         } catch (error) {
             console.error("Error deleting ranking:", error);
@@ -69,11 +69,7 @@ const ResumeRankings = () => {
     
     const addRanking = async () => {
         try {
-            await axios.post(`${config.backendUrl}/resume/resume-rankings`, newRanking, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            await axios.post(`${config.backendUrl}/ranking/rank-resume/${newRanking.resume_id}`);
             fetchRankings();
             setNewRanking({ resume_id: "", job_id });
         } catch (error) {
@@ -83,7 +79,7 @@ const ResumeRankings = () => {
     
     const updateRanking = async (id, updates) => {
         try {
-            await axios.put(`${config.backendUrl}/resume/resume-rankings/${id}`, updates, {
+            await axios.put(`${config.backendUrl}/ranking/resume-rankings/${id}`, updates, {
                 headers: {
                     'Content-Type': 'application/json'
                 }

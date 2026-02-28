@@ -181,7 +181,7 @@ const JobForm = ({ fetchJobs, setError, setSuccess }) => {
       });
       setShowForm(false);
       setSuccess("Job posted successfully!");
-    } catch (error) {
+    } catch {
       setError("Failed to post job. Please try again.");
     } finally {
       setIsSubmitting(false);

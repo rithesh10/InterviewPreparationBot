@@ -1,6 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { CircleCheck, Book, Play, Video, PenSquare, MessageSquare, User } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Book, Play, Video, PenSquare, MessageSquare } from 'lucide-react';
 function ContentPage() {
 	const location = useLocation();
 	const pathParts = location.pathname.split('/');

@@ -1,5 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CircleCheck } from 'lucide-react';
 
 function Dashboard() {

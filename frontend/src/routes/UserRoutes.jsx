@@ -9,6 +9,7 @@ import ThreeStepsComponent from '../Pages/User/ThreeStepsComponent'
 
 import Interview from '../Pages/User/Interview';
 import PerformanceMain from '../Pages/User/PerformanceMain';
+import Performance from '../Pages/User/Performance';
 import { useAuth } from '../context/AuthContext'
 import LearningDashboard from '../Pages/User/LearningDashboard'
 import Languages from '../Pages/User/Languages'

@@ -5,7 +5,7 @@ import config from '../config/config';
 import { useNavigate ,Link} from 'react-router-dom';
 
 const LoginPage = () => {
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({ email: '', password: '' });

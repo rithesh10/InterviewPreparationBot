@@ -1,6 +1,13 @@
 from flask import  Blueprint
 from app.middleware.auth_middleware import verify_jwt
-from app.controllers.gemini_controllers import start_interview, answer_question,summary_of_text,calculate_score,get_calculated_score
+from app.controllers.gemini_controllers import (
+    start_interview,
+    answer_question,
+    summary_of_text,
+    calculate_score,
+    get_calculated_score,
+    transcribe_audio,
+)
 
 gemini_bp = Blueprint("gemini", __name__)
 
@@ -27,3 +34,9 @@ def calculate(id):
 @verify_jwt
 def getCalculatedScore(id):
     return get_calculated_score(id)
+
+
+@gemini_bp.route("/transcribe-audio", methods=["POST"])
+@verify_jwt
+def transcribeAudio():
+    return transcribe_audio()

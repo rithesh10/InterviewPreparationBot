@@ -1,15 +1,78 @@
 import re
 # from app.Gemini.gemini import generate_prompt
 from flask import request, jsonify, g
-from datetime import datetime
+from datetime import datetime, timezone
 from db.db import mongo
+import os
 import asyncio
 from bson import ObjectId,json_util
 import json
 import asyncio
 from pymongo.errors import PyMongoError
+from groq import Groq
 from app.Gemini.gemini import generate_prompt
-from app.services.redis_service import r
+from app.services.redis_service import safe_delete, safe_get, safe_setex
+
+
+def _estimate_confidence_score(text):
+    """Estimate speaking confidence from communication feedback text."""
+    if not text:
+        return 50
+
+    normalized = str(text).lower()
+    positive_markers = [
+        "clear",
+        "confident",
+        "articulate",
+        "structured",
+        "concise",
+        "strong",
+        "good pace",
+        "well explained",
+    ]
+    negative_markers = [
+        "hesitation",
+        "hesitant",
+        "unclear",
+        "rambling",
+        "vague",
+        "nervous",
+        "poor",
+        "weak",
+        "confusing",
+    ]
+
+    score = 50
+    score += sum(10 for marker in positive_markers if marker in normalized)
+    score -= sum(10 for marker in negative_markers if marker in normalized)
+    return max(0, min(100, score))
+
+
+def _serialize_interview_score(score_doc):
+    """Make score documents frontend-friendly."""
+    score_doc["_id"] = str(score_doc["_id"])
+
+    created_at = score_doc.get("created_at")
+    if created_at and hasattr(created_at, "isoformat"):
+        score_doc["created_at"] = created_at.isoformat()
+    else:
+        # Backfill legacy documents from ObjectId timestamp
+        score_doc["created_at"] = score_doc["_id"][:8]
+        try:
+            score_doc["created_at"] = ObjectId(score_doc["_id"]).generation_time.isoformat()
+        except Exception:
+            score_doc["created_at"] = None
+
+    if "communication_confidence" not in score_doc:
+        score_doc["communication_confidence"] = _estimate_confidence_score(
+            score_doc.get("communication_skills")
+        )
+
+    for key, value in score_doc.items():
+        if hasattr(value, "isoformat"):
+            score_doc[key] = value.isoformat()
+
+    return score_doc
 def start_interview():
     """Start the interview process."""
     try:
@@ -259,11 +322,18 @@ def calculate_score(id):
         # Add metadata
         result['user_id'] = user_id
         result['interview_session_id'] = str(object_id)
+        result['created_at'] = datetime.now(timezone.utc)
+        result['communication_confidence'] = _estimate_confidence_score(
+            result.get("communication_skills")
+        )
 
         insert_result = mongo.db.interview_scores.insert_one(result)
         print(f"[DEBUG] Inserted score doc ID: {insert_result.inserted_id}")
+        safe_delete(f"interview_score:{user_id}")
 
-        return jsonify(result), 200
+        response_payload = dict(result)
+        response_payload["created_at"] = result["created_at"].isoformat()
+        return jsonify(response_payload), 200
 
     except Exception as e:
         print(f"[FATAL ERROR] {str(e)}", flush=True)
@@ -274,31 +344,69 @@ def get_calculated_score(user_id):
         cache_key = f"interview_score:{user_id}"
 
         # 1️⃣ Try fetching from Redis
-        cached_score = r.get(cache_key)
+        cached_score = safe_get(cache_key)
         if cached_score:
             interview_score = json.loads(cached_score)
             return jsonify({"interview_score": interview_score}), 200
 
         # 2️⃣ Fetch from MongoDB
-        scores_cursor = mongo.db.interview_scores.find({"user_id": user_id})
+        scores_cursor = mongo.db.interview_scores.find({"user_id": user_id}).sort("created_at", 1)
         score_list = list(scores_cursor)
 
         if not score_list:
             return jsonify({"message": "Score not found"}), 404
 
         # 3️⃣ Convert ObjectId and datetime for JSON serialization
-        for score in score_list:
-            score["_id"] = str(score["_id"])
-            for key, value in score.items():
-                if hasattr(value, "isoformat"):
-                    score[key] = value.isoformat()
+        score_list = [_serialize_interview_score(score) for score in score_list]
 
         # 4️⃣ Cache in Redis for 30 minutes
-        r.setex(cache_key, 1800, json.dumps(score_list))
+        safe_setex(cache_key, 1800, json.dumps(score_list))
 
         return jsonify({"interview_score": score_list}), 200
 
     except Exception as e:
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
+
+def transcribe_audio():
+    """Transcribe uploaded interview audio using Groq Whisper."""
+    try:
+        if "audio" not in request.files:
+            return jsonify({"error": "Audio file is required"}), 400
+
+        audio_file = request.files["audio"]
+        if not audio_file or audio_file.filename == "":
+            return jsonify({"error": "Audio file is required"}), 400
+
+        groq_api_key = os.getenv("GROQ_API_KEY")
+        if not groq_api_key:
+            return jsonify({"error": "GROQ_API_KEY is not configured"}), 500
+
+        audio_bytes = audio_file.read()
+        if not audio_bytes:
+            return jsonify({"error": "Uploaded audio is empty"}), 400
+
+        client = Groq(api_key=groq_api_key)
+        model_name = os.getenv("GROQ_WHISPER_MODEL", "whisper-large-v3-turbo")
+
+        transcription = client.audio.transcriptions.create(
+            file=(audio_file.filename or "recording.webm", audio_bytes),
+            model=model_name,
+            response_format="json",
+            language="en",
+            temperature=0,
+        )
+
+        transcript_text = getattr(transcription, "text", None)
+        if not transcript_text and isinstance(transcription, dict):
+            transcript_text = transcription.get("text")
+
+        if not transcript_text:
+            return jsonify({"error": "Unable to transcribe audio"}), 502
+
+        return jsonify({"text": transcript_text.strip()}), 200
+
+    except Exception as e:
+        return jsonify({"error": "Failed to transcribe audio", "details": str(e)}), 500
 
         

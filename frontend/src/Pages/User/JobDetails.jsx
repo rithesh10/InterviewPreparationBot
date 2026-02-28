@@ -7,8 +7,6 @@ import {
   Calendar,
   DollarSign,
 } from "lucide-react";
-import axios from "axios";
-import config from "../../config/config";
 import ResumeUpload from "./ResumeUpload";
 
 const JobDetails = ({ job, onBack }) => {

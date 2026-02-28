@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from app.models.job_model import job_schema, jobs_schema
 from app.middleware.auth_middleware import verify_jwt
 # # Create the model instance
-from app.services.redis_service import r
+from app.services.redis_service import safe_get, safe_setex
 import json
 def createJob(data):
     try:
@@ -43,8 +43,7 @@ def createJob(data):
 
 def getAllJobs():
     try:
-        jobs=r.get("getAllJobs")
-        print(r.ping())
+        jobs = safe_get("getAllJobs")
         if jobs:
             #  jobs=json.loads(jobs.decode('utf-8'))
              jobs=json.loads(jobs)
@@ -57,7 +56,7 @@ def getAllJobs():
             for key, value in job.items():
                 if hasattr(value, 'isoformat'):
                     job[key] = value.isoformat()
-        r.setex('getAllJobs',1800,json.dumps(jobs))
+        safe_setex('getAllJobs', 1800, json.dumps(jobs))
         return jsonify({"jobs": jobs}), 200
     except Exception as e:
         print(str(e))
@@ -67,7 +66,7 @@ def getJobById(id):
         cache_key = f"job:{id}"
 
         # 1️⃣ Try fetching from Redis
-        job = r.get(cache_key)
+        job = safe_get(cache_key)
         if job:
             # job is a JSON string → convert to dict
             job = json.loads(job)
@@ -85,7 +84,7 @@ def getJobById(id):
                 job[key] = value.isoformat()
 
         # 4️⃣ Cache in Redis for 5 minutes (300 seconds)
-        r.setex(cache_key, 1800, json.dumps(job))
+        safe_setex(cache_key, 1800, json.dumps(job))
 
         return jsonify({"job": job}), 200
 
