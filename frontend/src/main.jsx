@@ -6,15 +6,21 @@ import App from './App.jsx'
 import {BrowserRouter} from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { setupAxiosInterceptors } from './api/setupAxiosInterceptors.js'
+import { initializeBackendUrl } from './config/config.js'
 
-setupAxiosInterceptors()
+const bootstrap = async () => {
+  await initializeBackendUrl()
+  setupAxiosInterceptors()
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <AuthProvider>
-    <BrowserRouter>
-    <App/>
-    </BrowserRouter>
-    </AuthProvider>
-  </StrictMode>,
-)
+  createRoot(document.getElementById('root')).render(
+    <StrictMode>
+      <AuthProvider>
+      <BrowserRouter>
+      <App/>
+      </BrowserRouter>
+      </AuthProvider>
+    </StrictMode>,
+  )
+}
+
+bootstrap()
