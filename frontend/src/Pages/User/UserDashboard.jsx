@@ -12,7 +12,8 @@
  * Then ensure your tailwind config includes `fontFamily: { sans: ['Inter', 'ui-sans-serif', ...] }`
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Bell,
   Menu,
@@ -24,7 +25,12 @@ import {
   Clipboard,
   FileText,
   User,
+  Trash2,
+  Briefcase,
+  MapPin,
 } from "lucide-react";
+import config from "../../config/config";
+import { useAuth } from "../../context/AuthContext";
 
 /* -------------------------
    Reusable UI Components
@@ -185,8 +191,69 @@ const testimonials = [
    ------------------------- */
 const UserDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // placeholder user
-  const user = { name: "Alex Turner", role: "Product Manager" };
+  const { user } = useAuth();
+  const [applications, setApplications] = useState([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
+  const [applicationsError, setApplicationsError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
+  const displayName = user?.full_name || user?.name || "Guest User";
+  const displayRole = user?.role || "Candidate";
+  const displayInitials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      if (!user?._id) return;
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) return;
+
+      setApplicationsLoading(true);
+      setApplicationsError("");
+
+      try {
+        const response = await axios.get(
+          `${config.backendUrl}/resume/get-resume-with-jobs/${user._id}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+        setApplications(response.data?.resumes || []);
+      } catch (error) {
+        if (error?.response?.status !== 404) {
+          setApplicationsError("Failed to load your applications.");
+        }
+      } finally {
+        setApplicationsLoading(false);
+      }
+    };
+
+    fetchApplications();
+  }, [user?._id]);
+
+  const handleDeleteApplication = async (resumeId) => {
+    const shouldDelete = window.confirm("Delete this application?");
+    if (!shouldDelete) return;
+
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) return;
+
+    try {
+      setDeletingId(resumeId);
+      await axios.delete(`${config.backendUrl}/resume/application/${resumeId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      setApplications((prev) => prev.filter((item) => item._id !== resumeId));
+    } catch {
+      setApplicationsError("Failed to delete application.");
+    } finally {
+      setDeletingId("");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f7fbff_0%,_#eef6ff_100%)] font-sans text-slate-800">
@@ -226,11 +293,11 @@ const UserDashboard = () => {
 
               <div className="hidden md:flex items-center gap-3 bg-white rounded-full px-3 py-1 shadow-sm">
                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-slate-700">
-                  {user.name.split(" ").map(n => n[0]).slice(0,2).join("")}
+                  {displayInitials}
                 </div>
                 <div className="text-sm">
-                  <div className="font-medium">{user.name}</div>
-                  <div className="text-xs text-slate-500">{user.role}</div>
+                  <div className="font-medium">{displayName}</div>
+                  <div className="text-xs text-slate-500">{displayRole}</div>
                 </div>
               </div>
 
@@ -342,6 +409,69 @@ const UserDashboard = () => {
                 gradientTo="#DFF7EE"
               />
             </div>
+          </div>
+        </section>
+
+        <section className="mt-12 px-4">
+          <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-2xl font-bold">Applied Applications</h2>
+              <span className="text-sm text-slate-500">{applications.length} total</span>
+            </div>
+
+            {applicationsLoading && (
+              <p className="text-slate-500">Loading applications...</p>
+            )}
+
+            {applicationsError && (
+              <p className="text-red-600 text-sm mb-4">{applicationsError}</p>
+            )}
+
+            {!applicationsLoading && applications.length === 0 && (
+              <div className="text-slate-500 text-sm">
+                No applications yet. Apply for a job to see it here.
+              </div>
+            )}
+
+            {!applicationsLoading && applications.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {applications.map((application) => (
+                  <div
+                    key={application._id}
+                    className="border border-slate-200 rounded-xl p-4 bg-slate-50"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="font-semibold text-slate-800">
+                          {application.job?.title || "Untitled job"}
+                        </h3>
+                        <div className="mt-1 text-sm text-slate-600 flex items-center gap-2">
+                          <Briefcase size={14} />
+                          <span>{application.job?.company || "Unknown company"}</span>
+                        </div>
+                        <div className="mt-1 text-sm text-slate-500 flex items-center gap-2">
+                          <MapPin size={14} />
+                          <span>{application.job?.location || "Unknown location"}</span>
+                        </div>
+                        <p className="mt-2 text-xs text-slate-500">
+                          Experience: {application.experience ?? 0} years
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteApplication(application._id)}
+                        disabled={deletingId === application._id}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white bg-red-500 hover:bg-red-600 disabled:opacity-60"
+                      >
+                        <Trash2 size={14} />
+                        {deletingId === application._id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

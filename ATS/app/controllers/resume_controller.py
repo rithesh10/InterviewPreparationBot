@@ -9,7 +9,7 @@ from app.models.Resume_Model import ResumeSchema
 from datetime import datetime,timezone
 from db.db import mongo
 from bson import json_util, ObjectId
-from app.services.redis_service import safe_get, safe_mget, safe_setex
+from app.services.redis_service import safe_delete, safe_get, safe_mget, safe_setex
 import json
 import time
 resume_schema=ResumeSchema()
@@ -238,5 +238,34 @@ def get_resumes_with_jobs(user_id):
             "message": "Fetched successfully",
             "resumes": resume_list
         }), 200
+    except Exception as e:
+        return jsonify({"message": "Internal server error", "details": str(e)}), 500
+
+
+def delete_application(resume_id):
+    """Delete a user's job application (resume) and related ranking entries."""
+    try:
+        if not ObjectId.is_valid(resume_id):
+            return jsonify({"message": "Invalid resume ID format"}), 400
+
+        application = mongo.db.resume.find_one({"_id": ObjectId(resume_id)})
+        if not application:
+            return jsonify({"message": "Application not found"}), 404
+
+        current_user_id = getattr(g, "user", {}).get("_id")
+        if not current_user_id:
+            return jsonify({"message": "Unauthorized"}), 401
+
+        if str(application.get("user_id")) != str(current_user_id):
+            return jsonify({"message": "Forbidden"}), 403
+
+        mongo.db.resume.delete_one({"_id": ObjectId(resume_id)})
+        # Remove associated rankings to keep data consistent.
+        mongo.db.resume_rankings.delete_many({"resume_id": resume_id})
+
+        # Invalidate user application cache.
+        safe_delete(f"resumes:{current_user_id}")
+
+        return jsonify({"message": "Application deleted successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Internal server error", "details": str(e)}), 500

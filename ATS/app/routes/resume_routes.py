@@ -1,5 +1,12 @@
 from flask import Blueprint
-from app.controllers.resume_controller import upload_resume, get_by_jobId,get_by_Id,get_by_user_id,get_resumes_with_jobs
+from app.controllers.resume_controller import (
+    upload_resume,
+    get_by_jobId,
+    get_by_Id,
+    get_by_user_id,
+    get_resumes_with_jobs,
+    delete_application,
+)
 from app.middleware.auth_middleware import verify_jwt
 
 resume_bp = Blueprint("resume", __name__)
@@ -20,5 +27,12 @@ def get_resumeId(id):
 def getResumeByUserId(id):
     return get_by_user_id(id)   
 @resume_bp.route("/get-resume-with-jobs/<user_id>", methods=["GET"])
+@verify_jwt
 def getResumeWithJobs(user_id):
     return get_resumes_with_jobs(user_id)
+
+
+@resume_bp.route("/application/<resume_id>", methods=["DELETE"])
+@verify_jwt
+def deleteApplication(resume_id):
+    return delete_application(resume_id)
